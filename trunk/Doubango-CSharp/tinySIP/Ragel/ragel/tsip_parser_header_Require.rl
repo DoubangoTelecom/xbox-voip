@@ -1,7 +1,7 @@
-/*
-* Copyright (C) 2010-2011 Mamadou Diop.
+/* Copyright (C) 2010-2011 Mamadou Diop. 
+* Copyright (C) 2011 Doubango Telecom <http://www.doubango.org>
 *
-* Contact: Mamadou Diop <diopmamadou(at)doubango.org>
+* Contact: Mamadou Diop <diopmamadou(at)doubango(dot)org>
 *	
 * This file is part of Open Source Xbox-VoIP Project <http://code.google.com/p/xbox-voip/>
 *
@@ -17,26 +17,7 @@
 *	
 * You should have received a copy of the GNU General Public License
 * along with XBox-Voip.
-*
 */
-
-/**@file tsip_header_Require.c
- * @brief SIP Require header.
- *
- * @author Mamadou Diop <diopmamadou(at)doubango.org>
- *
-
- */
-#include "tinysip/headers/tsip_header_Require.h"
-
-#include "tinysip/parsers/tsip_parser_uri.h"
-
-#include "tsk_debug.h"
-#include "tsk_memory.h"
-
-#include <string.h>
-
-
 
 /***********************************
 *	Ragel state machine.
@@ -52,7 +33,7 @@
 	}
 	
 	action parse_option{
-		TSK_PARSER_ADD_STRING(hdr_require->options);
+		hdr_require.Options = TSK_RagelState.Parser.AddString(data, p, tag_start, hdr_require.Options);
 	}
 
 	action eob{
@@ -65,112 +46,99 @@
 
 }%%
 
-tsip_header_Require_t* tsip_header_Require_create(const char* option)
-{
-	return tsk_object_new(TSIP_HEADER_REQUIRE_VA_ARGS(option));
-}
 
-tsip_header_Require_t* tsip_header_Require_create_null()
-{
-	return tsip_header_Require_create(tsk_null);
-}
+using System;
+using Doubango_CSharp.tinySAK;
+using System.Collections.Generic;
 
-int tsip_header_Require_serialize(const tsip_header_t* header, tsk_buffer_t* output)
+namespace Doubango_CSharp.tinySIP.Headers
 {
-	if(header){
-		const tsip_header_Require_t *Require = (const tsip_header_Require_t *)header;
-		tsk_list_item_t *item;
-		tsk_string_t *str;
-		int ret = 0;
+    public class TSIP_HeaderRequire : TSIP_Header
+	{
+		private List<String> mOptions;
 
-		tsk_list_foreach(item, Require->options){
-			str = item->data;
-			if(item == Require->options->head){
-				ret = tsk_buffer_append(output, str->value, tsk_strlen(str->value));
-			}
-			else{
-				ret = tsk_buffer_append_2(output, ",%s", str->value);
-			}
+		public TSIP_HeaderRequire()
+			: this((String)null)
+		{
 		}
 
-		return ret;
-	}
+        public TSIP_HeaderRequire(String option)
+            : this(new List<String>(new String[]{option}))
+        {
+        }
 
-	return -1;
-}
+        public TSIP_HeaderRequire(List<String> options)
+			: base(tsip_header_type_t.Require)
+		{
+            if (options != null)
+            {
+                this.Options.AddRange(options.FindAll((x) => { return !String.IsNullOrEmpty(x); }));
+            }
+		}
 
-tsip_header_Require_t *tsip_header_Require_parse(const char *data, tsk_size_t size)
-{
-	int cs = 0;
-	const char *p = data;
-	const char *pe = p + size;
-	const char *eof = pe;
-	tsip_header_Require_t *hdr_require = tsip_header_Require_create_null();
-	
-	const char *tag_start;
+		public override String Value
+        {
+            get 
+            { 
+				String ret = String.Empty;
+                foreach(String option in this.Options)
+                {
+                    if(String.IsNullOrEmpty(ret))
+                    {
+                        ret = option;
+                    }
+                    else
+                    {
+                        ret += String.Format(",{0}", option);
+                    }
+                }
+                return ret;
+            }
+            set { TSK_Debug.Error("Not implemented"); }
+        }
 
-	%%write data;
-	%%write init;
-	%%write exec;
-	
-	if( cs < %%{ write first_final; }%% ){
-		TSK_DEBUG_ERROR("Failed to parse 'Require' header.");
-		TSK_OBJECT_SAFE_FREE(hdr_require);
-	}
-	
-	return hdr_require;
-}
+		public List<String> Options
+		{
+			get
+			{
+				if(mOptions == null)
+				{
+					mOptions = new List<String>();
+				}
+				return mOptions;
+			}
+			set{ mOptions = value; }
+		}
 
+		public Boolean IsRequired(String option)
+		{
+			return this.Options.Exists(
+                (x) => { return x.Equals(option, StringComparison.InvariantCultureIgnoreCase); }
+            );
+		}
 
+		%%write data;
 
+		public static TSIP_HeaderRequire Parse(String data)
+		{
+			int cs = 0;
+			int p = 0;
+			int pe = data.Length;
+			int eof = pe;
+			TSIP_HeaderRequire hdr_require = new TSIP_HeaderRequire();
 
-
-
-
-//========================================================
-//	Require header object definition
-//
-
-static tsk_object_t* tsip_header_Require_ctor(tsk_object_t *self, va_list * app)
-{
-	tsip_header_Require_t *Require = self;
-	if(Require){
-		const char* option;
-
-		TSIP_HEADER(Require)->type = tsip_htype_Require;
-		TSIP_HEADER(Require)->serialize = tsip_header_Require_serialize;
-
-		if((option = va_arg(*app, const char*))){
-			tsk_string_t* string = tsk_string_create(option);
-			Require->options = tsk_list_create();
-
-			tsk_list_push_back_data(Require->options, ((void**) &string));
+			int tag_start = 0;
+			
+			%%write init;
+			%%write exec;
+			
+			if( cs < %%{ write first_final; }%% ){
+				TSK_Debug.Error("Failed to parse SIP 'Require' header.");
+				hdr_require.Dispose();
+				hdr_require = null;
+			}
+			
+			return hdr_require;
 		}
 	}
-	else{
-		TSK_DEBUG_ERROR("Failed to create new Require header.");
-	}
-	return self;
 }
-
-static tsk_object_t* tsip_header_Require_dtor(tsk_object_t *self)
-{
-	tsip_header_Require_t *Require = self;
-	if(Require){
-		TSK_OBJECT_SAFE_FREE(Require->options);
-	}
-	else{
-		TSK_DEBUG_ERROR("Null Require header.");
-	}
-
-	return self;
-}
-
-static const tsk_object_def_t tsip_header_Require_def_s = 
-{
-	sizeof(tsip_header_Require_t),
-	tsip_header_Require_ctor,
-	tsip_header_Require_dtor,
-	tsk_null
-};
-const tsk_object_def_t *tsip_header_Require_def_t = &tsip_header_Require_def_s;

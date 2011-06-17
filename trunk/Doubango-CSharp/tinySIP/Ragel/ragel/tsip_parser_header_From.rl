@@ -1,7 +1,7 @@
-/*
-* Copyright (C) 2010-2011 Mamadou Diop.
+/* Copyright (C) 2010-2011 Mamadou Diop. 
+* Copyright (C) 2011 Doubango Telecom <http://www.doubango.org>
 *
-* Contact: Mamadou Diop <diopmamadou(at)doubango.org>
+* Contact: Mamadou Diop <diopmamadou(at)doubango(dot)org>
 *	
 * This file is part of Open Source Xbox-VoIP Project <http://code.google.com/p/xbox-voip/>
 *
@@ -17,23 +17,7 @@
 *	
 * You should have received a copy of the GNU General Public License
 * along with XBox-Voip.
-*
 */
-
-/**@file tsip_header_From.c
- * @brief SIP From/f header as per RFC 3261 subclause 20.20.
- *
- * @author Mamadou Diop <diopmamadou(at)doubango.org>
- *
-
- */
-#include "tinysip/headers/tsip_header_From.h"
-
-#include "tinysip/parsers/tsip_parser_uri.h"
-
-#include "tsk_debug.h"
-#include "tsk_memory.h"
-
 
 
 /***********************************
@@ -51,24 +35,24 @@
 	
 	action parse_uri{
 		int len = (int)(p  - tag_start);
-		if(hdr_from && !hdr_from->uri){
-			if((hdr_from->uri = tsip_uri_parse(tag_start, (tsk_size_t)len)) && hdr_from->display_name){
-				hdr_from->uri->display_name = tsk_strdup(hdr_from->display_name);
+		if(hdr_from != null && hdr_from.Uri == null){
+			if((hdr_from.Uri = TSIP_ParserUri.Parse(data.Substring(tag_start, len))) != null && !String.IsNullOrEmpty(hdr_from.DisplayName)){
+				hdr_from.Uri.DisplayName = hdr_from.DisplayName;
 			}
 		}
 	}
 
 	action parse_display_name{
-		TSK_PARSER_SET_STRING(hdr_from->display_name);
-		tsk_strunquote(&hdr_from->display_name);
+		hdr_from.DisplayName = TSK_RagelState.Parser.GetString(data, p, tag_start);
+		hdr_from.DisplayName = TSK_String.UnQuote(hdr_from.DisplayName);
 	}
 
 	action parse_tag{
-		TSK_PARSER_SET_STRING(hdr_from->tag);
+		hdr_from.Tag = TSK_RagelState.Parser.GetString(data, p, tag_start);
 	}
 
 	action parse_param{
-		TSK_PARSER_ADD_PARAM(TSIP_HEADER_PARAMS(hdr_from));
+		hdr_from.Params = TSK_RagelState.Parser.AddParam(data, p, tag_start, hdr_from.Params);
 	}
 
 	action eob{
@@ -88,105 +72,85 @@
 
 }%%
 
+using System;
+using Doubango_CSharp.tinySAK;
 
-tsip_header_From_t* tsip_header_From_create(const char* display_name, const tsip_uri_t* uri, const char* tag)
+namespace Doubango_CSharp.tinySIP.Headers
 {
-	return tsk_object_new(TSIP_HEADER_FROM_VA_ARGS(display_name, uri, tag));
-}
+    public class TSIP_HeaderFrom : TSIP_Header
+	{
+		private String mDisplayName;
+		private TSIP_Uri mUri;
+		private String mTag;
 
-int tsip_header_From_serialize(const tsip_header_t* header, tsk_buffer_t* output)
-{
-	int ret = -1;
-	if(header){
-		const tsip_header_From_t *From = (const tsip_header_From_t *)header;
-
-		/* Uri with hacked display-name*/
-		if((ret = tsip_uri_serialize(From->uri, tsk_true, tsk_true, output))){
-			return ret;
+		public TSIP_HeaderFrom()
+			: this(null,null,null)
+		{
 		}
-		if(From->tag){
-			ret = tsk_buffer_append_2(output, ";tag=%s", From->tag);
+
+		public TSIP_HeaderFrom(String displayName, TSIP_Uri uri, String tag)
+			: base(tsip_header_type_t.From)
+		{
+			this.DisplayName = displayName;
+			this.Uri = uri;
+			this.Tag = tag;
+		}
+
+		public override String Value
+        {
+            get 
+            { 
+               // Uri with hacked display-name
+                String ret = TSIP_Uri.Serialize(this.Uri, true, true);
+                if (ret != null && this.Tag != null)
+                {
+                    ret += String.Format(";tag={0}", this.Tag);
+                }
+                return ret;
+            }
+            set { TSK_Debug.Error("Not implemented"); }
+        }
+
+		public String DisplayName
+		{
+			get { return mDisplayName; }
+			set { mDisplayName = value;}
+		}
+
+		public TSIP_Uri Uri
+			{
+			get { return mUri; }
+			set { mUri = value;}
+		}
+
+		public String Tag
+		{
+			get { return mTag; }
+			set { mTag = value;}
+		}
+
+		%%write data;
+
+		public static TSIP_HeaderFrom Parse(String data)
+		{
+			int cs = 0;
+			int p = 0;
+			int pe = data.Length;
+			int eof = pe;
+			TSIP_HeaderFrom hdr_from = new TSIP_HeaderFrom();
+
+			int tag_start = 0;
+			
+			%%write init;
+			%%write exec;
+			
+			if( cs < %%{ write first_final; }%% ){
+				TSK_Debug.Error("Failed to parse SIP 'From' header.");
+				hdr_from.Dispose();
+				hdr_from = null;
+			}
+			
+			return hdr_from;
 		}
 	}
-	return ret;
 }
-
-tsip_header_From_t *tsip_header_From_parse(const char *data, tsk_size_t size)
-{
-	int cs = 0;
-	const char *p = data;
-	const char *pe = p + size;
-	const char *eof = pe;
-	tsip_header_From_t *hdr_from = tsip_header_From_create(tsk_null, tsk_null, tsk_null);
-	
-	const char *tag_start;
-
-	%%write data;
-	%%write init;
-	%%write exec;
-	
-	if( cs < %%{ write first_final; }%% ){
-		TSK_DEBUG_ERROR("Failed to parse 'From' header.");
-		TSK_OBJECT_SAFE_FREE(hdr_from);
-	}
-	
-	return hdr_from;
-}
-
-
-
-
-
-
-
-//========================================================
-//	From header object definition
-//
-
-static tsk_object_t* tsip_header_From_ctor(tsk_object_t *self, va_list * app)
-{
-	tsip_header_From_t *From = self;
-	if(From){
-		const char* display_name = va_arg(*app, const char *);
-		const tsip_uri_t* uri = va_arg(*app, const tsip_uri_t *);
-		const char* tag = va_arg(*app, const char *);
-
-		From->display_name = tsk_strdup(display_name);
-		if(uri) From->uri = tsk_object_ref((void *)uri);
-		From->tag = tsk_strdup(tag);
-
-		TSIP_HEADER(From)->type = tsip_htype_From;
-		TSIP_HEADER(From)->serialize = tsip_header_From_serialize;
-	}
-	else{
-		TSK_DEBUG_ERROR("Failed to create new From header.");
-	}
-	return self;
-}
-
-static tsk_object_t* tsip_header_From_dtor(tsk_object_t *self)
-{
-	tsip_header_From_t *From = self;
-	if(From){
-		TSK_FREE(From->display_name);
-		TSK_FREE(From->tag);
-
-		TSK_OBJECT_SAFE_FREE(From->uri);
-		TSK_OBJECT_SAFE_FREE(TSIP_HEADER_PARAMS(From));
-	}
-	else{
-		TSK_DEBUG_ERROR("Null From header.");
-	}
-
-	return self;
-}
-
-static const tsk_object_def_t tsip_header_From_def_s = 
-{
-	sizeof(tsip_header_From_t),
-	tsip_header_From_ctor,
-	tsip_header_From_dtor,
-	tsk_null
-};
-const tsk_object_def_t *tsip_header_From_def_t = &tsip_header_From_def_s;
-

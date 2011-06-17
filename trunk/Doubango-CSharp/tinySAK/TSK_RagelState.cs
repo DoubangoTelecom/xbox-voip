@@ -156,6 +156,17 @@ namespace Doubango_CSharp.tinySAK
                 }
                 return null;
             }
+
+            public static List<String> AddString(String data, int p, int tag_start, List<String> strings)
+            {
+                String @string = Parser.GetString(data, p, tag_start);
+                if (!String.IsNullOrEmpty(@string))
+                {
+                    strings.Add(@string);
+                }
+                return strings;
+            }
+
             public static TSK_Param GetParam(String data, int p, int tag_start)
             {
                 int len = (p - tag_start);
@@ -175,6 +186,11 @@ namespace Doubango_CSharp.tinySAK
             public static Int32 GetInt32(String data, int p, int tag_start)
             {
                 return (Int32)Parser.GetInt64(data, p, tag_start);
+            }
+
+            public static Int16 GetInt16(String data, int p, int tag_start)
+            {
+                return (Int16)Parser.GetInt64(data, p, tag_start);
             }
 
             public static UInt32 GetUInt32(String data, int p, int tag_start)

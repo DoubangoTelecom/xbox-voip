@@ -105,7 +105,7 @@ namespace Doubango_CSharp.tinySIP.Headers
 	        P_Visited_Network_ID
         };
 
-        protected tsip_header_type_t mType;
+        protected readonly tsip_header_type_t mType;
         protected List<TSK_Param> mParams;
 
         public TSIP_Header(tsip_header_type_t type)

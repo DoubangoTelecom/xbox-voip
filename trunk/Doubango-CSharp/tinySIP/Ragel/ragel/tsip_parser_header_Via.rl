@@ -1,7 +1,7 @@
-/*
-* Copyright (C) 2010-2011 Mamadou Diop.
+/* Copyright (C) 2010-2011 Mamadou Diop. 
+* Copyright (C) 2011 Doubango Telecom <http://www.doubango.org>
 *
-* Contact: Mamadou Diop <diopmamadou(at)doubango.org>
+* Contact: Mamadou Diop <diopmamadou(at)doubango(dot)org>
 *	
 * This file is part of Open Source Xbox-VoIP Project <http://code.google.com/p/xbox-voip/>
 *
@@ -17,22 +17,7 @@
 *	
 * You should have received a copy of the GNU General Public License
 * along with XBox-Voip.
-*
 */
-
-/**@file tsip_header_Via.c
- * @brief SIP Via/v header as per RFC 3261 subclause 20.42.
- *
- * @author Mamadou Diop <diopmamadou(at)doubango.org>
- *
-
- */
-#include "tinysip/headers/tsip_header_Via.h"
-
-#include "tsk_debug.h"
-#include "tsk_memory.h"
-
-
 
 /***********************************
 *	Ragel state machine.
@@ -49,71 +34,74 @@
 	}
 
 	action create_via{
-		if(!curr_via){
-			curr_via = tsip_header_Via_create_null();
+		if(curr_via == null){
+			curr_via = new TSIP_HeaderVia();
 		}
 	}
 
 	action parse_protocol_name{
-		TSK_PARSER_SET_STRING(curr_via->proto_name);
+		curr_via.ProtoName = TSK_RagelState.Parser.GetString(data, p, tag_start);
 	}
 
 	action parse_protocol_version{
-		TSK_PARSER_SET_STRING(curr_via->proto_version);
+		curr_via.ProtoVersion = TSK_RagelState.Parser.GetString(data, p, tag_start);
 	}
 
 	action parse_host{
-		TSK_PARSER_SET_STRING(curr_via->host);
-		if(curr_via->host && *curr_via->host == '['){
-			tsk_strunquote_2(&curr_via->host, '[', ']');
+		curr_via.Host = TSK_RagelState.Parser.GetString(data, p, tag_start);
+		if(!String.IsNullOrEmpty(curr_via.Host) && curr_via.Host[0] == '['){
+			curr_via.Host = TSK_String.UnQuote(curr_via.Host, '[', ']');
 		}
 	}
 
 	action parse_port{
-		TSK_PARSER_SET_INTEGER(curr_via->port);
+		curr_via.Port = TSK_RagelState.Parser.GetInt16(data, p, tag_start);
 	}
 
 	action parse_transport{
-		TSK_PARSER_SET_STRING(curr_via->transport);
+		curr_via.Transport = TSK_RagelState.Parser.GetString(data, p, tag_start);
 	}
 
 	action parse_ttl{
-		TSK_PARSER_SET_INTEGER(curr_via->ttl);
+		curr_via.TTL = TSK_RagelState.Parser.GetInt32(data, p, tag_start);
 	}
 
 	action parse_maddr{
-		TSK_PARSER_SET_STRING(curr_via->maddr);
+		curr_via.Maddr = TSK_RagelState.Parser.GetString(data, p, tag_start);
 	}
 	
 	action parse_received{
-		TSK_PARSER_SET_STRING(curr_via->received);
+		curr_via.Received = TSK_RagelState.Parser.GetString(data, p, tag_start);
 	}
 
 	action parse_branch{
-		TSK_PARSER_SET_STRING(curr_via->branch);
+		curr_via.Branch = TSK_RagelState.Parser.GetString(data, p, tag_start);
 	}
 
 	action parse_comp{
-		TSK_PARSER_SET_STRING(curr_via->comp);
+		curr_via.Comp = TSK_RagelState.Parser.GetString(data, p, tag_start);
 	}
 
 	action parse_rport{
-		TSK_PARSER_SET_INTEGER(curr_via->rport);
+		curr_via.RPort = TSK_RagelState.Parser.GetInt32(data, p, tag_start);
 	}
 
 	action has_rport{
-		if(curr_via->rport <0){
-			curr_via->rport = 0;
+		if(curr_via.RPort < 0){
+			curr_via.RPort = 0;
 		}
 	}
 
 	action parse_param{
-		TSK_PARSER_ADD_PARAM(TSIP_HEADER_PARAMS(curr_via));
+		if(curr_via != null){
+			curr_via.Params = TSK_RagelState.Parser.AddParam(data, p, tag_start, curr_via.Params);
+		}
 	}
 	
 	action add_via{
-		if(curr_via){
-			tsk_list_push_back_data(hdr_vias, ((void**) &curr_via));
+		if(curr_via != null){
+			hdr_vias.Add(curr_via);
+			curr_via = null;
 		}
 	}
 
@@ -142,200 +130,189 @@
 }%%
 
 
-tsip_header_Via_t* tsip_header_Via_create(const char* proto_name, const char* proto_version, const char* transport, const char* host, uint16_t port)
+using System;
+using Doubango_CSharp.tinySAK;
+using System.Collections.Generic;
+
+namespace Doubango_CSharp.tinySIP.Headers
 {
-	return tsk_object_new(TSIP_HEADER_VIA_VA_ARGS(proto_name, proto_version, transport, host, port));
-}
-tsip_header_Via_t* tsip_header_Via_create_null()
-{
-	return tsip_header_Via_create(tsk_null, tsk_null, tsk_null, tsk_null, 0);
-}
-
-int tsip_header_Via_serialize(const tsip_header_t* header, tsk_buffer_t* output)
-{
-	if(header){
-		const tsip_header_Via_t *Via = (const tsip_header_Via_t *)header;
-		tsk_istr_t port, rport, ttl;
-		int ipv6 = (Via->host && tsk_strcontains(Via->host, tsk_strlen(Via->host), ":"));
-
-		if(Via->port){
-			tsk_itoa(Via->port, &port);
-		}
-		if(Via->rport){
-			tsk_itoa(Via->rport, &rport);
-		}
-		if(Via->ttl){
-			tsk_itoa(Via->ttl, &ttl);
-		}
-
-		/* SIP/2.0/UDP [::]:1988;test=1234;comp=sigcomp;rport=254;ttl=457;received=192.0.2.101;branch=z9hG4bK1245420841406\r\n" */
-		return tsk_buffer_append_2(output, "%s/%s/%s %s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
-
-			Via->proto_name ? Via->proto_name : "SIP",
-
-			Via->proto_version ? Via->proto_version : "2.0",
-
-			Via->transport ? Via->transport : "UDP",
-
-			ipv6 ? "[" : "",
-			Via->host ? Via->host : "127.0.0.1",
-			ipv6 ? "]" : "",
-
-			Via->port ? ":" : "",
-			Via->port ? port : "",
-
-			Via->maddr ? ";maddr=" : "",
-			Via->maddr ? Via->maddr : "",
-
-			Via->sigcomp_id ? ";sigcomp-id=" : "",
-			Via->sigcomp_id ? Via->sigcomp_id : "",
-
-			Via->comp ? ";comp=" : "",
-			Via->comp ? Via->comp : "",
-
-			Via->rport>=0 ? (Via->rport>0?";rport=":";rport") : "",
-			Via->rport>0 ? rport : "",
-
-			Via->ttl>=0 ? (Via->ttl>0?";ttl=":";ttl") : "",
-			Via->ttl>0 ? ttl : "",
-
-			Via->received ? ";received=" : "",
-			Via->received ? Via->received : "",
-
-			Via->branch ? ";branch=" : "",
-			Via->branch ? Via->branch : ""
-			);
-	}
-	return -1;
-}
-
-char* tsip_header_Via_get_special_param_value(const tsip_header_t* header, const char* pname)
-{
-	if(header){
-		const tsip_header_Via_t *Via = (const tsip_header_Via_t *)header;
-		if(tsk_striequals(pname, "maddr")){
-			return tsk_strdup(Via->maddr);
-		}
-		else if(tsk_striequals(pname, "sigcomp-id")){
-			return tsk_strdup(Via->sigcomp_id);
-		}
-		else if(tsk_striequals(pname, "comp")){
-			return tsk_strdup(Via->comp);
-		}
-		else if(tsk_striequals(pname, "rport")){
-			tsk_istr_t rport;
-			tsk_itoa(Via->rport, &rport);
-
-			return tsk_strdup(rport);
-		}
-		else if(tsk_striequals(pname, "received")){
-			return tsk_strdup(Via->received);
-		}
-		else if(tsk_striequals(pname, "branch")){
-			return tsk_strdup(Via->branch);
-		}
-	}
-	return tsk_null;
-}
-
-tsip_header_Vias_L_t *tsip_header_Via_parse(const char *data, tsk_size_t size)
-{
-	int cs = 0;
-	const char *p = data;
-	const char *pe = p + size;
-	const char *eof = pe;
-	tsip_header_Vias_L_t *hdr_vias = tsk_list_create();
-	tsip_header_Via_t *curr_via = tsk_null;
+    public class TSIP_HeaderVia : TSIP_Header
+	{
+		private String mBranch;
+		private String mHost;
+		private Int16 mPort;
+		private String mComp;
+		private String mSigcompId;
+		private String mReceived;
+		private String mMaddr;
+		private String mProtoName;
+		private String mProtoVersion;
+		private String mTransport;
 	
-	const char *tag_start;
+		private Int32 mRPort;
+		private Int32 mTTL;
 
-	%%write data;
-	%%write init;
-	%%write exec;
-	
-	if( cs < %%{ write first_final; }%% ){
-		TSK_DEBUG_ERROR("Failed to parse 'Via' header.");
-		TSK_OBJECT_SAFE_FREE(curr_via);
-		TSK_OBJECT_SAFE_FREE(hdr_vias);
-	}
-	
-	return hdr_vias;
-}
+        public TSIP_HeaderVia()
+            :this(null,null,null,null,-1)
+        {
+        }
 
+		public TSIP_HeaderVia(String protoName, String protoVersion, String transport, String host, Int16 port)
+			: base(tsip_header_type_t.Via)
+		{
+			this.ProtoName = protoName;
+            this.ProtoVersion = protoVersion;
+            this.Transport = transport;
+            this.Host = host;
+            this.Port = port;
 
+			this.RPort = -1;
+			this.TTL = -1;
+		}
 
+        public override String Value
+        {
+            /* SIP/2.0/UDP [::]:1988;test=1234;comp=sigcomp;rport=254;ttl=457;received=192.0.2.101;branch=z9hG4bK1245420841406\r\n" */
+            get 
+            { 
+                Boolean isIPv6 = !String.IsNullOrEmpty(this.Host) && this.Host.Contains(":");
+				return String.Format("{0}/{1}/{2} {3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}{15}{16}{17}{18}{19}{20}{21}",
+                        !String.IsNullOrEmpty(this.ProtoName) ? this.ProtoName : "SIP",
 
+                        !String.IsNullOrEmpty(this.ProtoVersion) ? this.ProtoVersion : "2.0",
 
+                        !String.IsNullOrEmpty(this.Transport) ? this.Transport : "UDP",
 
+			            isIPv6 ? "[" : String.Empty,
+                        !String.IsNullOrEmpty(this.Host) ? this.Host : "127.0.0.1",
+			            isIPv6 ? "]" : String.Empty,
 
+			            this.Port>0 ? ":" : String.Empty,
+			            this.Port>0 ? this.Port.ToString() : String.Empty,
 
+                        !String.IsNullOrEmpty(this.mMaddr) ? ";maddr=" : String.Empty,
+                        !String.IsNullOrEmpty(this.mMaddr) ? this.mMaddr : String.Empty,
 
+                        !String.IsNullOrEmpty(this.SigcompId) ? ";sigcomp-id=" : String.Empty,
+                        !String.IsNullOrEmpty(this.SigcompId) ? this.SigcompId : String.Empty,
 
+                        !String.IsNullOrEmpty(this.Comp) ? ";comp=" : String.Empty,
+                        !String.IsNullOrEmpty(this.Comp) ? this.Comp : String.Empty,
 
-//========================================================
-//	Via header object definition
-//
+			            this.RPort>=0 ? (this.RPort>0? ";rport=" : ";rport") : String.Empty,
+                        this.RPort>0 ? this.RPort.ToString() : String.Empty,
 
-static tsk_object_t* tsip_header_Via_ctor(tsk_object_t *self, va_list * app)
-{
-	tsip_header_Via_t *via = self;
-	if(via){
-		const char* proto_name = va_arg(*app, const char *);
-		const char* proto_version = va_arg(*app, const char *);
-		const char* transport = va_arg(*app, const char *);
-		const char* host = va_arg(*app, const char *);
-#if defined(__GNUC__)
-		uint16_t port = (uint16_t)va_arg(*app, unsigned);
-#else
-		uint16_t port = va_arg(*app, uint16_t);
-#endif
+                        this.TTL>=0 ? (this.TTL>0? ";ttl=" : ";ttl") : String.Empty,
+                        this.TTL>0 ? this.TTL.ToString() : String.Empty,
 
-		if(proto_name) via->proto_name = tsk_strdup(proto_name);
-		if(proto_version) via->proto_version = tsk_strdup(proto_version);
-		if(transport) via->transport = tsk_strdup(transport);
-		if(host) via->host = tsk_strdup(host);
-		via->port = port;
+			            !String.IsNullOrEmpty(this.Received) ? ";received=" : String.Empty,
+			            !String.IsNullOrEmpty(this.Received) ? this.Received : String.Empty,
 
-		via->rport = -1;
-		via->ttl = -1;
+                        !String.IsNullOrEmpty(this.Branch) ? ";branch=" : String.Empty,
+			            !String.IsNullOrEmpty(this.Branch) ? this.Branch : String.Empty
+                    );
+            }
+            set { TSK_Debug.Error("Not implemented"); }
+        }
+
+		public String Branch
+		{
+			get{ return mBranch; }
+			set{ mBranch = value; }
+		}
+
+		public String Host
+		{
+			get{ return mHost; }
+			set{ mHost = value; }
+		}
+
+		public Int16 Port
+		{
+			get{ return mPort; }
+			set{ mPort = value; }
+		}
 		
-		TSIP_HEADER(via)->type = tsip_htype_Via;
-		TSIP_HEADER(via)->serialize = tsip_header_Via_serialize;
-		TSIP_HEADER(via)->get_special_param_value = tsip_header_Via_get_special_param_value;
+		public String Comp
+		{
+			get{ return mComp; }
+			set{ mComp = value; }
+		}
+		
+		public String SigcompId
+		{
+			get{ return mSigcompId; }
+			set{ mSigcompId = value; }
+		}
+
+		public String Received
+		{
+			get{ return mReceived; }
+			set{ mReceived = value; }
+		}
+
+		public String Maddr
+		{
+			get{ return mMaddr; }
+			set{ mMaddr = value; }
+		}
+		
+		public String ProtoName
+		{
+			get{ return mProtoName; }
+			set{ mProtoName = value; }
+		}
+
+		public String ProtoVersion
+		{
+			get{ return mProtoVersion; }
+			set{ mProtoVersion = value; }
+		}
+
+		public String Transport
+		{
+			get{ return mTransport; }
+			set{ mTransport = value; }
+		}
+
+		public Int32 RPort
+		{
+			get{ return mRPort; }
+			set{ mRPort = value; }
+		}
+
+		public Int32 TTL
+		{
+			get{ return mTTL; }
+			set{ mTTL = value; }
+		}
+
+		%%write data;
+
+		public static List<TSIP_HeaderVia> Parse(String data)
+		{
+			int cs = 0;
+			int p = 0;
+			int pe = data.Length;
+			int eof = pe;
+			List<TSIP_HeaderVia> hdr_vias = new List<TSIP_HeaderVia>();
+			TSIP_HeaderVia curr_via = null;
+
+			int tag_start = 0;
+
+			
+			%%write init;
+			%%write exec;
+			
+			if( cs < %%{ write first_final; }%% ){
+				TSK_Debug.Error("Failed to parse SIP 'Via' header.");
+				hdr_vias.Clear();
+				hdr_vias = null;
+				curr_via.Dispose();
+				curr_via = null;
+			}
+			
+			return hdr_vias;
+		}
 	}
-	else{
-		TSK_DEBUG_ERROR("Failed to create new Via header.");
-	}
-	return self;
 }
-
-static tsk_object_t* tsip_header_Via_dtor(tsk_object_t *self)
-{
-	tsip_header_Via_t *via = self;
-	if(via){
-		TSK_FREE(via->branch);
-		TSK_FREE(via->comp);
-		TSK_FREE(via->host);
-		TSK_FREE(via->maddr);
-		TSK_FREE(via->proto_name);
-		TSK_FREE(via->proto_version);
-		TSK_FREE(via->received);
-		TSK_FREE(via->sigcomp_id);
-		TSK_FREE(via->transport);
-		TSK_OBJECT_SAFE_FREE(TSIP_HEADER_PARAMS(via));
-	}
-	else{
-		TSK_DEBUG_ERROR("Null Via header.");
-	}
-
-	return self;
-}
-
-static const tsk_object_def_t tsip_header_Via_def_s = 
-{
-	sizeof(tsip_header_Via_t),
-	tsip_header_Via_ctor,
-	tsip_header_Via_dtor,
-	tsk_null
-};
-const tsk_object_def_t *tsip_header_Via_def_t = &tsip_header_Via_def_s;

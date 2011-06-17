@@ -50,7 +50,7 @@ ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderDummy.cs ./ragel/tsip_parser_header_
 ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderExpires.cs ./ragel/tsip_parser_header_Expires.rl
 
 # ==From
-#ragel.exe $OPTIONS -o ./src/headers/tsip_header_From.c ./ragel/tsip_parser_header_From.rl
+ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderFrom.cs ./ragel/tsip_parser_header_From.rl
 
 # ==Max-Forwards
 #ragel.exe $OPTIONS -o ./src/headers/tsip_header_Max_Forwards.c ./ragel/tsip_parser_header_Max_Forwards.rl
@@ -107,7 +107,7 @@ ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderExpires.cs ./ragel/tsip_parser_heade
 #ragel.exe $OPTIONS -o ./src/headers/tsip_header_Referred_By.c ./ragel/tsip_parser_header_Referred_By.rl
 
 # ==Require
-#ragel.exe $OPTIONS -o ./src/headers/tsip_header_Require.c ./ragel/tsip_parser_header_Require.rl
+ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderRequire.cs ./ragel/tsip_parser_header_Require.rl
 
 # == Route
 #ragel.exe $OPTIONS -o ./src/headers/tsip_header_Route.c ./ragel/tsip_parser_header_Route.rl
@@ -143,16 +143,16 @@ ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderExpires.cs ./ragel/tsip_parser_heade
 #ragel.exe $OPTIONS -o ./src/headers/tsip_header_Subscription_State.c ./ragel/tsip_parser_header_Subscription_State.rl
 
 # ==Supported
-#ragel.exe $OPTIONS -o ./src/headers/tsip_header_Supported.c ./ragel/tsip_parser_header_Supported.rl
+ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderSupported.cs ./ragel/tsip_parser_header_Supported.rl
 
 # ==To
-#ragel.exe $OPTIONS -o ./src/headers/tsip_header_To.c ./ragel/tsip_parser_header_To.rl
+ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderTo.cs ./ragel/tsip_parser_header_To.rl
 
 # ==User-Agent
 #ragel.exe $OPTIONS -o ./src/headers/tsip_header_User_Agent.c ./ragel/tsip_parser_header_User_Agent.rl
 
 # ==Via
-#ragel.exe $OPTIONS -o ./src/headers/tsip_header_Via.c ./ragel/tsip_parser_header_Via.rl
+ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderVia.cs ./ragel/tsip_parser_header_Via.rl
 
 # ==Warning
 #ragel.exe $OPTIONS -o ./src/headers/tsip_header_Warning.c ./ragel/tsip_parser_header_Warning.rl

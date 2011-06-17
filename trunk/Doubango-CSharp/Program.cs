@@ -37,7 +37,13 @@ namespace Doubango_CSharp
         {
             Test_UriParser.TestParser();
 
-            TSIP_HeaderContentType header = TSIP_HeaderContentType.Parse("Content-Type: plain/text;charset=utf-8;t=78\r\n");
+            /*List<TSIP_HeaderVia> headers = TSIP_HeaderVia.Parse("Via: SIP/2.0/tcp 127.0.0.1:5082;branch=z9hG4bKc16be5aee32df400d01015675ab911ba,SIP/2.0/udp 127.0.0.1:5082;branch=z9hG4bKeec53b25db240bec92ea250964b8c1fa;received_port_ext=5081;received=192.168.0.13,SIP/2.0/UDP 192.168.0.12:57121;rport=57121;branch=z9hG4bK1274980921982;received_port_ext=5081;received=192.168.0.12\r\n");
+            foreach (TSIP_HeaderVia h in headers)
+            {
+                Console.WriteLine(h.ToString(true, true, true));
+            }*/
+
+            TSIP_HeaderTo header = TSIP_HeaderTo.Parse("t:    <sip:mamadou@open-ims.test>;tag= 12345\r\n");
             if (header != null)
             {
                 Console.WriteLine(header.ToString(true, true, true));
