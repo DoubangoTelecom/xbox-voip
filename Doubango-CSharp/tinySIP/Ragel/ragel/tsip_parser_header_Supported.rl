@@ -1,7 +1,7 @@
-/*
-* Copyright (C) 2010-2011 Mamadou Diop.
+/* Copyright (C) 2010-2011 Mamadou Diop. 
+* Copyright (C) 2011 Doubango Telecom <http://www.doubango.org>
 *
-* Contact: Mamadou Diop <diopmamadou(at)doubango.org>
+* Contact: Mamadou Diop <diopmamadou(at)doubango(dot)org>
 *	
 * This file is part of Open Source Xbox-VoIP Project <http://code.google.com/p/xbox-voip/>
 *
@@ -17,26 +17,7 @@
 *	
 * You should have received a copy of the GNU General Public License
 * along with XBox-Voip.
-*
 */
-
-/**@file tsip_header_Supported.c
- * @brief SIP Supported/k header.
- *
- * @author Mamadou Diop <diopmamadou(at)doubango.org>
- *
-
- */
-#include "tinysip/headers/tsip_header_Supported.h"
-
-#include "tinysip/parsers/tsip_parser_uri.h"
-
-#include "tsk_debug.h"
-#include "tsk_memory.h"
-
-#include <string.h>
-
-
 
 /***********************************
 *	Ragel state machine.
@@ -52,7 +33,7 @@
 	}
 	
 	action parse_option{
-		TSK_PARSER_ADD_STRING(hdr_supported->options);
+		hdr_supported.Options = TSK_RagelState.Parser.AddString(data, p, tag_start, hdr_supported.Options);
 	}
 
 	action eob{
@@ -65,112 +46,98 @@
 
 }%%
 
-tsip_header_Supported_t* tsip_header_Supported_create(const char* option)
-{
-	return tsk_object_new(TSIP_HEADER_SUPPORTED_VA_ARGS(option));
-}
+using System;
+using Doubango_CSharp.tinySAK;
+using System.Collections.Generic;
 
-tsip_header_Supported_t* tsip_header_Supported_create_null()
+namespace Doubango_CSharp.tinySIP.Headers
 {
-	return tsip_header_Supported_create(tsk_null);
-}
+    public class TSIP_HeaderSupported : TSIP_Header
+	{
+		private List<String> mOptions;
 
-int tsip_header_Supported_serialize(const tsip_header_t* header, tsk_buffer_t* output)
-{
-	if(header){
-		const tsip_header_Supported_t *Supported = (const tsip_header_Supported_t *)header;
-		tsk_list_item_t *item;
-		tsk_string_t *str;
-		int ret = 0;
-
-		tsk_list_foreach(item, Supported->options){
-			str = item->data;
-			if(item == Supported->options->head){
-				ret = tsk_buffer_append(output, str->value, tsk_strlen(str->value));
-			}
-			else{
-				ret = tsk_buffer_append_2(output, ",%s", str->value);
-			}
+		public TSIP_HeaderSupported()
+			: this((String)null)
+		{
 		}
 
-		return ret;
-	}
+        public TSIP_HeaderSupported(String option)
+            : this(new List<String>(new String[]{option}))
+        {
+        }
 
-	return -1;
-}
+        public TSIP_HeaderSupported(List<String> options)
+			: base(tsip_header_type_t.Supported)
+		{
+            if (options != null)
+            {
+                this.Options.AddRange(options.FindAll((x) => { return !String.IsNullOrEmpty(x); }));
+            }
+		}
 
-tsip_header_Supported_t *tsip_header_Supported_parse(const char *data, tsk_size_t size)
-{
-	int cs = 0;
-	const char *p = data;
-	const char *pe = p + size;
-	const char *eof = pe;
-	tsip_header_Supported_t *hdr_supported = tsip_header_Supported_create_null();
-	
-	const char *tag_start;
+		public override String Value
+        {
+            get 
+            { 
+				String ret = String.Empty;
+                foreach(String option in this.Options)
+                {
+                    if(String.IsNullOrEmpty(ret))
+                    {
+                        ret = option;
+                    }
+                    else
+                    {
+                        ret += String.Format(",{0}", option);
+                    }
+                }
+                return ret;
+            }
+            set { TSK_Debug.Error("Not implemented"); }
+        }
 
-	%%write data;
-	%%write init;
-	%%write exec;
-	
-	if( cs < %%{ write first_final; }%% ){
-		TSK_DEBUG_ERROR("Failed to parse 'Supported' header.");
-		TSK_OBJECT_SAFE_FREE(hdr_supported);
-	}
-	
-	return hdr_supported;
-}
+		public List<String> Options
+		{
+			get
+			{
+				if(mOptions == null)
+				{
+					mOptions = new List<String>();
+				}
+				return mOptions;
+			}
+			set{ mOptions = value; }
+		}
 
+		public Boolean IsSupported(String option)
+		{
+			return this.Options.Exists(
+                (x) => { return x.Equals(option, StringComparison.InvariantCultureIgnoreCase); }
+            );
+		}
 
+		%%write data;
 
+		public static TSIP_HeaderSupported Parse(String data)
+		{
+			int cs = 0;
+			int p = 0;
+			int pe = data.Length;
+			int eof = pe;
+			TSIP_HeaderSupported hdr_supported = new TSIP_HeaderSupported();
 
-
-
-
-//========================================================
-//	Supported header object definition
-//
-
-static tsk_object_t* tsip_header_Supported_ctor(tsk_object_t *self, va_list * app)
-{
-	tsip_header_Supported_t *Supported = self;
-	if(Supported){
-		const char* option;
-
-		TSIP_HEADER(Supported)->type = tsip_htype_Supported;
-		TSIP_HEADER(Supported)->serialize = tsip_header_Supported_serialize;
-
-		if((option = va_arg(*app, const char*))){
-			tsk_string_t* string = tsk_string_create(option);
-			Supported->options = tsk_list_create();
-
-			tsk_list_push_back_data(Supported->options, ((void**) &string));
+			int tag_start = 0;
+			
+			%%write init;
+			%%write exec;
+			
+			if( cs < %%{ write first_final; }%% ){
+				TSK_Debug.Error("Failed to parse SIP 'Supported' header.");
+				hdr_supported.Dispose();
+				hdr_supported = null;
+			}
+			
+			return hdr_supported;
 		}
 	}
-	else{
-		TSK_DEBUG_ERROR("Failed to create new Supported header.");
-	}
-	return self;
 }
-
-static tsk_object_t* tsip_header_Supported_dtor(tsk_object_t *self)
-{
-	tsip_header_Supported_t *Supported = self;
-	if(Supported){
-		TSK_OBJECT_SAFE_FREE(Supported->options);
-	}
-	else{
-		TSK_DEBUG_ERROR("Null Supported header.");
-	}
-
-	return self;
-}
-
-static const tsk_object_def_t tsip_header_Supported_def_s = 
-{
-	sizeof(tsip_header_Supported_t),
-	tsip_header_Supported_ctor,
-	tsip_header_Supported_dtor,
-	tsk_null
-};
-const tsk_object_def_t *tsip_header_Supported_def_t = &tsip_header_Supported_def_s;

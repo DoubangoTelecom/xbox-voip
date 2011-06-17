@@ -23,6 +23,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Doubango_CSharp.tinySIP.Headers;
+using Doubango_CSharp.tinySAK;
+using tsip_header_type_t = Doubango_CSharp.tinySIP.Headers.TSIP_Header.tsip_header_type_t;
 
 namespace Doubango_CSharp.tinySIP
 {
@@ -62,9 +64,9 @@ namespace Doubango_CSharp.tinySIP
         private tsip_message_type_t mType;
 
         // Most common headers
-        // private TSIP_HeaderVia mFirstVia;
-        // private TSIP_HeaderFrom mFrom;
-        // private TSIP_HeaderTo mTo;
+        private TSIP_HeaderVia mFirstVia;
+        private TSIP_HeaderFrom mFrom;
+        private TSIP_HeaderTo mTo;
         private TSIP_HeaderContact mContact;
         private TSIP_HeaderCallId mCallId;
         private TSIP_HeaderCSeq mCSeq;
@@ -79,6 +81,8 @@ namespace Doubango_CSharp.tinySIP
         private String mSigCompId;
         private Boolean mShouldUpdate;
 
+        private byte[] mContent;
+
         ~TSIP_Message()
         {
             this.Dispose();
@@ -86,7 +90,7 @@ namespace Doubango_CSharp.tinySIP
 
         public void Dispose()
         {
-            /*if (mFirstVia != null)
+            if (mFirstVia != null)
             {
                 mFirstVia.Dispose();
             }
@@ -97,7 +101,7 @@ namespace Doubango_CSharp.tinySIP
             if (mTo != null)
             {
                 mTo.Dispose();
-            }*/
+            }
             if (mContact != null)
             {
                 mContact.Dispose();
@@ -136,10 +140,25 @@ namespace Doubango_CSharp.tinySIP
             set { mType = value; }
         }
 
-        
-        // private TSIP_HeaderVia mFirstVia;
-        // private TSIP_HeaderFrom mFrom;
-        // private TSIP_HeaderTo mTo;
+
+        public TSIP_HeaderVia FirstVia
+        {
+            get { return mFirstVia; }
+            set { mFirstVia = value; }
+        }
+
+        public TSIP_HeaderFrom From
+        {
+            get { return mFrom; }
+            set { mFrom = value; }
+        }
+
+        public TSIP_HeaderTo To
+        {
+            get { return mTo; }
+            set { mTo = value; }
+        }
+
         public TSIP_HeaderContact Contact
         {
             get { return mContact; }
@@ -203,9 +222,302 @@ namespace Doubango_CSharp.tinySIP
             set { mShouldUpdate = value; }
         }
 
+        public Int64 ExpiresValue
+        {
+            get
+            {
+                return this.GetExpiresValue();
+            }
+        }
 
+        public UInt32 ContentLengthValue
+        {
+            get
+            {
+                return this.GetContentLengthValue();
+            }
+        }
 
+        public byte[] Content
+        {
+            get
+            {
+                return mContent;
+            }
+        }
 
+        public Boolean AddHeaders(TSIP_Header[] headers)
+        {
+            if (headers == null)
+            {
+                TSK_Debug.Error("Invalid paramerer");
+                return false;
+            }
+
+            foreach(TSIP_Header header in headers)
+            {
+                switch(header.Type)
+                {
+                    case TSIP_Header.tsip_header_type_t.Via:
+                        {
+                            if(this.FirstVia == null)
+                            {
+                                this.FirstVia = (header as TSIP_HeaderVia);
+                                continue;
+                            }
+                            break;
+                        }
+
+                        case TSIP_Header.tsip_header_type_t.From:
+                        {
+                            if(this.From == null)
+                            {
+                                this.From = (header as TSIP_HeaderFrom);
+                                continue;
+                            }
+                            break;
+                        }
+
+                        case TSIP_Header.tsip_header_type_t.To:
+                        {
+                            if(this.To == null)
+                            {
+                                this.To = (header as TSIP_HeaderTo);
+                                continue;
+                            }
+                            break;
+                        }
+
+                        case TSIP_Header.tsip_header_type_t.Contact:
+                        {
+                            if(this.Contact == null)
+                            {
+                                this.Contact = (header as TSIP_HeaderContact);
+                                continue;
+                            }
+                            break;
+                        }
+
+                        case TSIP_Header.tsip_header_type_t.Call_ID:
+                        {
+                            if(this.CallId == null)
+                            {
+                                this.CallId = (header as TSIP_HeaderCallId);
+                                continue;
+                            }
+                            break;
+                        }
+
+                        case TSIP_Header.tsip_header_type_t.CSeq:
+                        {
+                            if(this.CSeq == null)
+                            {
+                                this.CSeq = (header as TSIP_HeaderCSeq);
+                                continue;
+                            }
+                            break;
+                        }
+
+                        case TSIP_Header.tsip_header_type_t.Content_Type:
+                        {
+                            if(this.ContentType == null)
+                            {
+                                this.ContentType = (header as TSIP_HeaderContentType);
+                                continue;
+                            }
+                            break;
+                        }
+
+                        case TSIP_Header.tsip_header_type_t.Content_Length:
+                        {
+                            if(this.ContentLength == null)
+                            {
+                                this.ContentLength = (header as TSIP_HeaderContentLength);
+                                continue;
+                            }
+                            break;
+                        }
+                }
+
+                this.Headers.Add(header);
+            }
+
+            return true;
+        }
+
+        public Boolean AddHeaders(List<TSIP_Header> headers)
+        {
+            if(headers == null)
+            {
+                TSK_Debug.Error("Invalid paramerer");
+                return false;
+            }
+
+            return this.AddHeaders(headers.ToArray());
+        }
+
+        public Boolean AddContent(String contentType, byte[]content)
+        {
+            if (!String.IsNullOrEmpty(contentType))
+            {
+                this.ContentType = new TSIP_HeaderContentType(contentType);
+            }
+            if (content != null)
+            {
+                mContent = content;
+                this.ContentLength = new TSIP_HeaderContentLength((uint)mContent.Length);
+            }
+
+            return true;
+        }
+
+        public TSIP_Header GetHeaderAtIndex(tsip_header_type_t type, int index)
+        {
+	        /* Do not forget to update tinyWRAP::SipMessage::getHeaderAt() */
+	        int pos = 0;
+	        TSIP_Header hdr = null;
+            		
+	        switch(type)
+	        {
+	        case tsip_header_type_t.Via:
+		        if(index == 0){
+			        hdr = this.FirstVia;
+			        goto bail;
+		        }else pos++; break;
+	        case tsip_header_type_t.From:
+		        if(index == 0){
+			        hdr = this.From;
+			        goto bail;
+		        }else pos++; break;
+	        case tsip_header_type_t.To:
+		        if(index == 0){
+			        hdr = this.To;
+			        goto bail;
+		        }else pos++; break;
+	        case tsip_header_type_t.Contact:
+		        if(index == 0){
+			        hdr = this.Contact;
+			        goto bail;
+		        }else pos++; break;
+	        case tsip_header_type_t.Call_ID:
+		        if(index == 0){
+			        hdr = this.CallId;
+			        goto bail;
+		        }else pos++; break;
+	        case tsip_header_type_t.CSeq:
+		        if(index == 0){
+			        hdr = this.CSeq;
+			        goto bail;
+		        }else pos++; break;
+	        case tsip_header_type_t.Expires:
+		        if(index == 0){
+			        hdr = this.Expires;
+			        goto bail;
+		        }else pos++; break;
+	        case tsip_header_type_t.Content_Type:
+		        if(index == 0){
+			        hdr = this.ContentType;
+			        goto bail;
+		        }else pos++; break;
+	        case tsip_header_type_t.Content_Length:
+		        if(index == 0){
+			        hdr = this.ContentLength;
+			        goto bail;
+		        }else pos++; break;
+	        default:
+		        break;
+	        }
+
+            foreach(TSIP_Header h in this.Headers)
+            {
+                if(h.Type == type)
+                {
+                    if(pos++ >= index)
+                    {
+                        hdr = h;
+                        break;
+                    }
+                }
+            }	        
+
+        bail:
+	        return hdr;
+        }
+
+        public TSIP_Header GetHeader(tsip_header_type_t type)
+        {
+            return this.GetHeaderAtIndex(type, 0);
+        }
+
+        public Boolean IsAllowed(String method)
+        {
+            int index = 0;
+            TSIP_HeaderAllow hdr_allow;
+
+            while ((hdr_allow = this.GetHeaderAtIndex(tsip_header_type_t.Allow, index++) as TSIP_HeaderAllow) != null)
+            {
+                if (hdr_allow.IsAllowed(method))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public Boolean IsSupported(String option)
+        {
+            int index = 0;
+            TSIP_HeaderSupported hdr_supported;
+
+            while ((hdr_supported = this.GetHeaderAtIndex(tsip_header_type_t.Supported, index++) as TSIP_HeaderSupported) != null)
+            {
+                if (hdr_supported.IsSupported(option))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public Boolean IsRequired(String option)
+        {
+            int index = 0;
+            TSIP_HeaderRequire hdr_require;
+
+            while ((hdr_require = this.GetHeaderAtIndex(tsip_header_type_t.Require, index++) as TSIP_HeaderRequire) != null)
+            {
+                if (hdr_require.IsRequired(option))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public Int64 GetExpiresValue()
+        {
+            if (this.Expires != null)
+            {
+                return this.Expires.DeltaSeconds;
+            }
+
+            // FIXME: You MUST choose the right contact
+            if (this.Contact != null)
+            {
+                return this.Contact.Expires;
+            }
+            return -1;
+        }
+
+        public UInt32 GetContentLengthValue()
+        {
+            if (this.Content != null)
+            {
+                return (UInt32)this.Content.Length;
+            }
+            return 0;
+        }
+       
         public static tsip_request_type_t GetRequestType(String method)
         {
             if (String.IsNullOrEmpty(method))
@@ -274,6 +586,7 @@ namespace Doubango_CSharp.tinySIP
         }
     }
 
+    #region Request
 
     /// <summary>
     /// SIP Request
@@ -303,7 +616,10 @@ namespace Doubango_CSharp.tinySIP
         }
     }
 
+    #endregion
 
+
+    #region Response
 
     /// <summary>
     /// SIP Response
@@ -325,4 +641,6 @@ namespace Doubango_CSharp.tinySIP
             set { mReasonPhrase = value; }
         }
     }
+
+    #endregion
 }

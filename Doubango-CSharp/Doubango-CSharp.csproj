@@ -86,6 +86,11 @@
     <Compile Include="tinySIP\Headers\TSIP_HeaderCSeq.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderDummy.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderExpires.cs" />
+    <Compile Include="tinySIP\Headers\TSIP_HeaderFrom.cs" />
+    <Compile Include="tinySIP\Headers\TSIP_HeaderRequire.cs" />
+    <Compile Include="tinySIP\Headers\TSIP_HeaderSupported.cs" />
+    <Compile Include="tinySIP\Headers\TSIP_HeaderTo.cs" />
+    <Compile Include="tinySIP\Headers\TSIP_HeaderVia.cs" />
     <Compile Include="tinySIP\Parsers\TSIP_ParserUri.cs" />
     <Compile Include="tinySIP\Transactions\TSIP_Transac.cs" />
     <Compile Include="tinySIP\Transactions\TSIP_TransacICT.cs" />
