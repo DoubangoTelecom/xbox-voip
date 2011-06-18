@@ -7,10 +7,10 @@ export OPTIONS="-A -L -T0"
 ragel.exe $OPTIONS -o ../Parsers/TSIP_ParserUri.cs ./ragel/tsip_parser_uri.rl
 
 # SIP message (both requests an responses) parser.
-#ragel.exe $OPTIONS -o ./src/parsers/tsip_parser_message.c ./ragel/tsip_parser_message.rl
+ragel.exe $OPTIONS -o ../Parsers/TSIP_ParserMessage.cs ./ragel/tsip_parser_message.rl
 
 # SIP headers parser
-#ragel.exe $OPTIONS -o ./src/parsers/tsip_parser_header.c ./ragel/tsip_parser_header.rl
+ragel.exe $OPTIONS -o ../Parsers/TSIP_ParserHeader.cs ./ragel/tsip_parser_header.rl
 
 
 # ==Allow
@@ -53,7 +53,7 @@ ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderExpires.cs ./ragel/tsip_parser_heade
 ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderFrom.cs ./ragel/tsip_parser_header_From.rl
 
 # ==Max-Forwards
-#ragel.exe $OPTIONS -o ./src/headers/tsip_header_Max_Forwards.c ./ragel/tsip_parser_header_Max_Forwards.rl
+ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderMaxForwards.cs ./ragel/tsip_parser_header_Max_Forwards.rl
 
 # ==Min-Expires
 #ragel.exe $OPTIONS -o ./src/headers/tsip_header_Min_Expires.c ./ragel/tsip_parser_header_Min_Expires.rl
@@ -95,7 +95,7 @@ ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderFrom.cs ./ragel/tsip_parser_header_F
 #ragel.exe $OPTIONS -o ./src/headers/tsip_header_RAck.c ./ragel/tsip_parser_header_RAck.rl
 
 # ==Record-Route
-#ragel.exe $OPTIONS -o ./src/headers/tsip_header_Record_Route.c ./ragel/tsip_parser_header_Record_Route.rl
+ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderRecordRoute.cs ./ragel/tsip_parser_header_Record_Route.rl
 
 # ==Refer-Sub
 #ragel.exe $OPTIONS -o ./src/headers/tsip_header_Refer_Sub.c ./ragel/tsip_parser_header_Refer_Sub.rl
@@ -110,7 +110,7 @@ ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderFrom.cs ./ragel/tsip_parser_header_F
 ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderRequire.cs ./ragel/tsip_parser_header_Require.rl
 
 # == Route
-#ragel.exe $OPTIONS -o ./src/headers/tsip_header_Route.c ./ragel/tsip_parser_header_Route.rl
+ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderRoute.cs ./ragel/tsip_parser_header_Route.rl
 
 # ==RSeq
 #ragel.exe $OPTIONS -o ./src/headers/tsip_header_RSeq.c ./ragel/tsip_parser_header_RSeq.rl

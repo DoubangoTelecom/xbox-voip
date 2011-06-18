@@ -20,8 +20,8 @@
 */
 
 using System;
-using Doubango_CSharp.tinySIP;
-using Doubango_CSharp.tinySAK;
+using Doubango.tinySIP;
+using Doubango.tinySAK;
 
 /***********************************
 *	Ragel state machine.

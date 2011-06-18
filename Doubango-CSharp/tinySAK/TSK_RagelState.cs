@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Doubango_CSharp.tinySAK
+namespace Doubango.tinySAK
 {
     public class TSK_RagelState
     {
@@ -13,8 +13,9 @@ namespace Doubango_CSharp.tinySAK
         private int mEOF;
         private int mTagStart;
         private int mTagEnd;
+        private byte[] mData;
 
-        public TSK_RagelState(String data)
+        public TSK_RagelState(byte[] data)
         {
             this.CS = 0;
             this.P = 0;
@@ -23,6 +24,8 @@ namespace Doubango_CSharp.tinySAK
 
             this.TagStart = 0;
             this.TagEnd = 0;
+
+            mData = data;
         }
 
         public int CS
@@ -61,7 +64,12 @@ namespace Doubango_CSharp.tinySAK
             set { mTagEnd = value; }
         }
 
-        public static TSK_RagelState Init(String data)
+        public byte[] Data
+        {
+            get { return mData; }
+        }
+
+        public static TSK_RagelState Init(byte[] data)
         {
             return new TSK_RagelState(data);
         }

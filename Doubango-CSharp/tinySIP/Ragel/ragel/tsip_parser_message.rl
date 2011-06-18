@@ -1,5 +1,5 @@
-/*
-* Copyright (C) 2010-2011 Mamadou Diop.
+/* Copyright (C) 2010-2011 Mamadou Diop. 
+* Copyright (C) 2011 Doubango Telecom <http://www.doubango.org>
 *
 * Contact: Mamadou Diop <diopmamadou(at)doubango.org>
 *	
@@ -17,32 +17,7 @@
 *	
 * You should have received a copy of the GNU General Public License
 * along with XBox-Voip.
-*
 */
-
-/**@file tsip_parser_message.c
- * @brief SIP parser.
- *
- * @author Mamadou Diop <diopmamadou(at)doubango.org>
- *
-
- */
-#include "tinysip/parsers/tsip_parser_message.h"
-#include "tinysip/parsers/tsip_parser_header.h"
-
-#include "tinysip/parsers/tsip_parser_uri.h"
-
-#include "tsk_debug.h"
-#include "tsk_memory.h"
-
-static void tsip_message_parser_execute(tsk_ragel_state_t *state, tsip_message_t *message, tsk_bool_t extract_content);
-static void tsip_message_parser_init(tsk_ragel_state_t *state);
-static void tsip_message_parser_eoh(tsk_ragel_state_t *state, tsip_message_t *message, tsk_bool_t extract_content);
-
-// Check if we have ",CRLF" ==> See WWW-Authenticate header
-// As :>CRLF is preceded by any+ ==> p will be at least (start + 1)
-// p point to CR
-#define prev_not_comma(p) !(p && p[-1] == ',')
 
 /***********************************
 *	Ragel state machine.
@@ -53,129 +28,106 @@ static void tsip_message_parser_eoh(tsk_ragel_state_t *state, tsip_message_t *me
 	#/* Tag the buffer (start point). */
 	action tag
 	{
-		state->tag_start = p;
+		state.TagStart = p;
 	}
 
 	#/* SIP method */
 	action parse_method
 	{
 		int len;
-		state->tag_end = p;
-		len = (int)(state->tag_end  - state->tag_start);
-
-		if(message->type == tsip_unknown)
-		{
-			message->type = tsip_request;
-			if(!message->line.request.method)
-			{
-				message->line.request.method = tsk_calloc(1, len+1);
-				memcpy(message->line.request.method, state->tag_start, len);
-				message->line.request.request_type = tsip_request_get_type(message->line.request.method);
-			}
-		}
-		else
-		{
-			state->cs = tsip_machine_parser_message_error;
-		}
+		state.TagEnd = p;
+		len = (int)(state.TagEnd  - state.TagStart);
+        String method = Encoding.UTF8.GetString(data, state.TagStart, len);
+        if(message == null)
+        {
+            message = new TSIP_Request(method, null, null, null, null,0);
+        }
+        else
+        {
+            state.CS = tsip_machine_parser_message_error;
+        }
 	}
 
 	#/* Request URI parsing */
 	action parse_requesturi
 	{
 		int len;
-		state->tag_end = p;
-		len = (int)(state->tag_end  - state->tag_start);
-		
-		if(!message->line.request.uri)
-		{
-			message->line.request.uri = tsip_uri_parse(state->tag_start, (tsk_size_t)len);
-		}
+		state.TagEnd = p;
+		len = (int)(state.TagEnd  - state.TagStart);
+        if ((message as TSIP_Request).Uri == null)
+        {
+            (message as TSIP_Request).Uri = TSIP_ParserUri.Parse(Encoding.UTF8.GetString(state.Data, state.TagStart, len));
+        }
 	}
 
 	#/* Sip Version */
 	action parse_sipversion
 	{
 		int len;
-		state->tag_end = p;
-		len = (int)(state->tag_end  - state->tag_start);
-
-		if(!message->sip_version)
+		state.TagEnd = p;
+		len = (int)(state.TagEnd  - state.TagStart);
+		
+		if(message == null)
 		{
-			message->sip_version = tsk_calloc(1, len+1);
-			memcpy(message->sip_version, state->tag_start, len);
+            message = new TSIP_Response(0, null, null);
 		}
+        message.Version = Encoding.UTF8.GetString(state.Data, state.TagStart, len);
 	}
 
 	#/* Status Code */
 	action parse_status_code
 	{
 		int len;
-		state->tag_end = p;
-		len = (int)(state->tag_end  - state->tag_start);
-		
-		if(message->type == tsip_unknown)
-		{
-			message->type = tsip_response;
-			message->line.response.status_code = atoi(state->tag_start);
-		}
-		else
-		{
-			state->cs = tsip_machine_parser_message_error;
-		}
+		state.TagEnd = p;
+		len = (int)(state.TagEnd  - state.TagStart);
+        
+        if (message == null)
+        {
+            message = new TSIP_Response(0, null, null);
+        }
+
+        UInt16 statusCode = 0;
+        if (UInt16.TryParse(Encoding.UTF8.GetString(state.Data, state.TagStart, len), out statusCode))
+        {
+            (message as TSIP_Response).StatusCode = statusCode;
+        }
 	}
 
 	#/* Reason Phrase */
 	action parse_reason_phrase
 	{
 		int len;
-		state->tag_end = p;
-		len = (int)(state->tag_end  - state->tag_start);
-
-		if(!message->line.response.reason_phrase)
-		{
-			message->line.response.reason_phrase = tsk_calloc(1, len+1);
-			memcpy(message->line.response.reason_phrase, state->tag_start, len);
-		}
+		state.TagEnd = p;
+		len = (int)(state.TagEnd  - state.TagStart);
+        (message as TSIP_Response).ReasonPhrase = Encoding.UTF8.GetString(state.Data, state.TagStart, len);
 	}
 
 	#/* Parse sip header */
 	action parse_header
 	{
 		int len;
-		state->tag_end = p;
-		len = (int)(state->tag_end  - state->tag_start);
+		state.TagEnd = p;
+		len = (int)(state.TagEnd  - state.TagStart);
 		
-		if(tsip_header_parse(state, message)){
-			//TSK_DEBUG_INFO("TSIP_MESSAGE_PARSER::PARSE_HEADER len=%d state=%d", len, state->cs);
-		}
-		else{
-			TSK_DEBUG_ERROR("Failed to parse header - %s", state->tag_start);
+		if(!TSIP_ParserHeader.Parse(state, ref message)){
+			TSK_Debug.Error("Failed to parse header at {0}", state.TagStart);
 		}
 	}
-
-	#/* Parse sip content/body. */
-	#action parse_body
-	#{
-	#	int len;
-	#	state->tag_end = p;
-	#	len = (int)(state->tag_end  - state->tag_start);
-	#	TSK_DEBUG_ERROR("==TSIP_MESSAGE_PARSER::PARSE_BODY==");
-	#}
 
 	#/* End-Of-Headers */
 	action eoh
 	{
-		state->cs = cs;
-		state->p = p;
-		state->pe = pe;
-		state->eof = eof;
+		state.CS = cs;
+		state.P = p;
+		state.PE = pe;
+		state.EOF = eof;
 
-		tsip_message_parser_eoh(state, message, extract_content);
+		TSIP_ParserMessage.EoH(ref state, ref message, extractContent);
 
-		cs = state->cs;
-		p = state->p;
-		pe = state->pe;
-		eof = state->eof;
+		cs = state.CS;
+		p = state.P;
+		pe = state.PE;
+		eof = state.EOF;
 	}
 
 	# Includes
@@ -186,87 +138,95 @@ static void tsip_message_parser_eoh(tsk_ragel_state_t *state, tsip_message_t *me
 	main := SIP_message;
 }%%
 
+using System;
+using Doubango.tinySIP;
+using Doubango.tinySAK;
+using System.Text;
+using System.IO;
 
-/* Regel data */
-%%write data;
-
-
-tsk_bool_t tsip_message_parse(tsk_ragel_state_t *state, tsip_message_t **result, tsk_bool_t extract_content)
+public static class TSIP_ParserMessage
 {
-	if(!state || state->pe <= state->p){
-		return tsk_false;
-	}
+	%%write data;
 
-	if(!*result){
-		*result = tsip_message_create();
-	}
-
-	/* Ragel init */
-	tsip_message_parser_init(state);
-
-	/*
-	*	State mechine execution.
-	*/
-	tsip_message_parser_execute(state, *result, extract_content);
-
-	/* Check result */
-
-	if( state->cs < %%{ write first_final; }%% )
+	public static TSIP_Message Parse(byte[] content, Boolean extractContent)
 	{
-		TSK_OBJECT_SAFE_FREE(*result);
-		return tsk_false;
+		TSK_RagelState state = TSK_RagelState.Init(content);
+        byte[] data = content;
+		TSIP_Message message = null;
+
+		// Ragel init
+		TSIP_ParserMessage.Init(ref state);
+
+		// State mechine execution
+		message = TSIP_ParserMessage.Execute(ref state, extractContent);
+		
+		// Check result
+		if(message != null && state.CS < %%{ write first_final; }%% )
+		{
+			message.Dispose();
+			message = null;
+		}
+		return message;
 	}
-	return tsk_true;
-}
 
-
-static void tsip_message_parser_init(tsk_ragel_state_t *state)
-{
-	int cs = 0;
-
-	/* Regel machine initialization. */
-	%% write init;
-	
-	state->cs = cs;
-}
-
-static void tsip_message_parser_execute(tsk_ragel_state_t *state, tsip_message_t *message, tsk_bool_t extract_content)
-{
-	int cs = state->cs;
-	const char *p = state->p;
-	const char *pe = state->pe;
-	const char *eof = state->eof;
-
-	%% write exec;
-
-	state->cs = cs;
-	state->p = p;
-	state->pe = pe;
-	state->eof = eof;
-}
-
-static void tsip_message_parser_eoh(tsk_ragel_state_t *state, tsip_message_t *message, tsk_bool_t extract_content)
-{
-	int cs = state->cs;
-	const char *p = state->p;
-	const char *pe = state->pe;
-	const char *eof = state->eof;
-
-	if(extract_content && message)
+	private static void Init(ref TSK_RagelState state)
 	{
-		uint32_t clen = TSIP_MESSAGE_CONTENT_LENGTH(message);
-		if((p+clen) <pe && !message->Content){
-			message->Content = tsk_buffer_create((p+1), clen);
-			p = (p+clen);
-		}
-		else{
-			p = (pe-1);
-		}
-	}
-	//%%write eof;
+		int cs = 0;
+		
+		// Ragel machine initialization
+		%% write init;
 
-	state->cs = cs;
-	state->p = p;
-	state->pe = pe;
-	state->eof = eof;
+		state.CS = cs;
+	}
+
+	private static TSIP_Message Execute(ref TSK_RagelState state, Boolean extractContent)
+	{
+		int cs = state.CS;
+		int p = state.P;
+		int pe = state.PE;
+		int eof = state.EOF;
+		byte[] data = state.Data;
+		TSIP_Message message = null;
+
+		%% write exec;
+
+		state.CS = cs;
+		state.P = p;
+		state.PE = pe;
+		state.EOF = eof;
+
+		return message;
+	}
+
+	// Check if we have ",CRLF" ==> See WWW-Authenticate header
+	// As :>CRLF is preceded by any+ ==> p will be at least (start + 1)
+	// p point to CR
+	private static Boolean PrevNotComma(TSK_RagelState state, int p)
+	{
+		return (state.PE <= p) || ((char)state.Data[p-1] != ',');
+	}
+
+	private static void EoH(ref TSK_RagelState state, ref TSIP_Message message, Boolean extractContent)
+    {
+        int cs = state.CS;
+        int p = state.P;
+        int pe = state.PE;
+        int eof = state.EOF;
+
+        if (extractContent && message != null)
+        {
+            int clen = (int)(message.ContentLength != null ? message.ContentLength.Length : 0);
+            if ((p + clen) < pe && message.Content == null)
+            {
+                byte[] content = new byte[clen];
+                Buffer.BlockCopy(state.Data, p + 1, content, 0, clen);
+                message.AddContent(null, content);
+                p = (p + clen);
+            }
+            else
+            {
+                p = (pe - 1);
+            }
+        }
+    }
 }

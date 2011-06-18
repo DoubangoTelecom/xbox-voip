@@ -56,10 +56,10 @@
 
 
 using System;
-using Doubango_CSharp.tinySAK;
+using Doubango.tinySAK;
 using System.Collections.Generic;
 
-namespace Doubango_CSharp.tinySIP.Headers
+namespace Doubango.tinySIP.Headers
 {
     public class TSIP_HeaderAllow : TSIP_Header
     {
@@ -95,9 +95,24 @@ namespace Doubango_CSharp.tinySIP.Headers
 
 		public Boolean IsAllowed(String method)
 		{
+            if(String.IsNullOrEmpty(method))
+            {
+                return false;
+            }
+#if WINDOWS_PHONE
+            foreach (String _method in this.Methods)
+            {
+                if (String.Equals(_method, method, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+#else
 			return this.Methods.Exists(
                 (x) => { return x.Equals(method, StringComparison.InvariantCultureIgnoreCase); }
             );
+#endif
 		}
 		
 		public override String Value

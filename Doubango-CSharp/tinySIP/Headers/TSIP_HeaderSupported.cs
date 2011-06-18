@@ -29,10 +29,10 @@
 
 
 using System;
-using Doubango_CSharp.tinySAK;
+using Doubango.tinySAK;
 using System.Collections.Generic;
 
-namespace Doubango_CSharp.tinySIP.Headers
+namespace Doubango.tinySIP.Headers
 {
     public class TSIP_HeaderSupported : TSIP_Header
 	{
@@ -53,7 +53,17 @@ namespace Doubango_CSharp.tinySIP.Headers
 		{
             if (options != null)
             {
+#if WINDOWS_PHONE
+                foreach (String option in options)
+                {
+                    if (!String.IsNullOrEmpty(option))
+                    {
+                        this.Options.Add(option);
+                    }
+                }
+#else
                 this.Options.AddRange(options.FindAll((x) => { return !String.IsNullOrEmpty(x); }));
+#endif
             }
 		}
 
@@ -93,13 +103,24 @@ namespace Doubango_CSharp.tinySIP.Headers
 
 		public Boolean IsSupported(String option)
 		{
+#if WINDOWS_PHONE
+            foreach (String _option in this.Options)
+            {
+                if (String.Equals(_option, option, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+#else
 			return this.Options.Exists(
                 (x) => { return x.Equals(option, StringComparison.InvariantCultureIgnoreCase); }
             );
+#endif
 		}
 
 		
-/* #line 103 "../Headers/TSIP_HeaderSupported.cs" */
+/* #line 124 "../Headers/TSIP_HeaderSupported.cs" */
 static readonly sbyte[] _tsip_machine_parser_header_Supported_actions =  new sbyte [] {
 	0, 1, 0, 1, 1, 1, 2
 };
@@ -182,7 +203,7 @@ const int tsip_machine_parser_header_Supported_error = 0;
 const int tsip_machine_parser_header_Supported_en_main = 1;
 
 
-/* #line 120 "./ragel/tsip_parser_header_Supported.rl" */
+/* #line 141 "./ragel/tsip_parser_header_Supported.rl" */
 
 		public static TSIP_HeaderSupported Parse(String data)
 		{
@@ -195,14 +216,14 @@ const int tsip_machine_parser_header_Supported_en_main = 1;
 			int tag_start = 0;
 			
 			
-/* #line 199 "../Headers/TSIP_HeaderSupported.cs" */
+/* #line 220 "../Headers/TSIP_HeaderSupported.cs" */
 	{
 	cs = tsip_machine_parser_header_Supported_start;
 	}
 
-/* #line 132 "./ragel/tsip_parser_header_Supported.rl" */
+/* #line 153 "./ragel/tsip_parser_header_Supported.rl" */
 			
-/* #line 206 "../Headers/TSIP_HeaderSupported.cs" */
+/* #line 227 "../Headers/TSIP_HeaderSupported.cs" */
 	{
 	sbyte _klen;
 	byte _trans;
@@ -293,7 +314,7 @@ _match:
 	{
 	}
 	break;
-/* #line 297 "../Headers/TSIP_HeaderSupported.cs" */
+/* #line 318 "../Headers/TSIP_HeaderSupported.cs" */
 		default: break;
 		}
 	}
@@ -307,12 +328,12 @@ _again:
 	_out: {}
 	}
 
-/* #line 133 "./ragel/tsip_parser_header_Supported.rl" */
+/* #line 154 "./ragel/tsip_parser_header_Supported.rl" */
 			
 			if( cs < 
-/* #line 314 "../Headers/TSIP_HeaderSupported.cs" */
+/* #line 335 "../Headers/TSIP_HeaderSupported.cs" */
 22
-/* #line 134 "./ragel/tsip_parser_header_Supported.rl" */
+/* #line 155 "./ragel/tsip_parser_header_Supported.rl" */
  ){
 				TSK_Debug.Error("Failed to parse SIP 'Supported' header.");
 				hdr_supported.Dispose();

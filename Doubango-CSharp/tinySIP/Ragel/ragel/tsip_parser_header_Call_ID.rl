@@ -48,9 +48,9 @@
 }%%
 
 using System;
-using Doubango_CSharp.tinySAK;
+using Doubango.tinySAK;
 
-namespace Doubango_CSharp.tinySIP.Headers
+namespace Doubango.tinySIP.Headers
 {
     public class TSIP_HeaderCallId : TSIP_Header
 	{

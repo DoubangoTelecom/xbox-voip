@@ -57,10 +57,10 @@
 }%%
 
 using System;
-using Doubango_CSharp.tinySAK;
+using Doubango.tinySAK;
 using System.Collections.Generic;
 
-namespace Doubango_CSharp.tinySIP.Headers
+namespace Doubango.tinySIP.Headers
 {
     public class TSIP_HeaderAllowEvents : TSIP_Header
 	{
@@ -118,9 +118,21 @@ namespace Doubango_CSharp.tinySIP.Headers
 		
 		public Boolean IsEventAllowed(String @event)
 		{
+ 
+#if WINDOWS_PHONE
+            foreach (String _event in this.Events)
+            {
+                if (String.Equals(_event, @event, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+#else
 			return this.Events.Exists(
                 (x) => { return x.Equals(@event, StringComparison.InvariantCultureIgnoreCase); }
             );
+#endif
 		}
 
 		%%write data;

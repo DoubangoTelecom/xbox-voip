@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Doubango_CSharp.tinySIP.Dialogs
+namespace Doubango.tinySIP.Dialogs
 {
     public partial class TSIP_DialogInvite : TSIP_Dialog
     {
