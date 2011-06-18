@@ -22,11 +22,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Doubango_CSharp.tinySIP.Headers;
-using Doubango_CSharp.tinySAK;
-using tsip_header_type_t = Doubango_CSharp.tinySIP.Headers.TSIP_Header.tsip_header_type_t;
+using Doubango.tinySIP.Headers;
+using Doubango.tinySAK;
+using tsip_header_type_t = Doubango.tinySIP.Headers.TSIP_Header.tsip_header_type_t;
+using System.IO;
 
-namespace Doubango_CSharp.tinySIP
+namespace Doubango.tinySIP
 {
     /// <summary>
     /// Abstract class representing a SIP Message (Request or Response)
@@ -60,6 +61,10 @@ namespace Doubango_CSharp.tinySIP
             PRACK
         }
 
+        public const String TSIP_MESSAGE_VERSION_10 = "SIP/1.0";
+        public const String TSIP_MESSAGE_VERSION_20 = "SIP/2.0";
+        public const String TSIP_MESSAGE_VERSION_DEFAULT = TSIP_MESSAGE_VERSION_20;
+
         private String mVersion;
         private tsip_message_type_t mType;
 
@@ -82,6 +87,11 @@ namespace Doubango_CSharp.tinySIP
         private Boolean mShouldUpdate;
 
         private byte[] mContent;
+
+        protected TSIP_Message(tsip_message_type_t type)
+        {
+            mType = type;
+        }
 
         ~TSIP_Message()
         {
@@ -240,10 +250,116 @@ namespace Doubango_CSharp.tinySIP
 
         public byte[] Content
         {
-            get
+            get { return mContent; }
+        }
+
+        public Boolean IsRequest
+        {
+            get{ return this.Type == tsip_message_type_t.Request; }
+        }
+
+        public Boolean IsResponse
+        {
+            get{ return this.Type == tsip_message_type_t.Response; }
+        }
+
+        public override String  ToString()
+        {
+            return this.ToStringEx(true);
+        }
+
+
+        public byte[] ToBytes()
+        {
+            String headers = this.ToStringEx(false);
+            byte[] bytes = null;
+            using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(headers)))
             {
-                return mContent;
+                if (this.Content != null)
+                {
+                    stream.Write(this.Content, 0, this.Content.Length);
+                }
+                bytes = stream.GetBuffer();
             }
+            return bytes;
+       }
+
+        private String ToStringEx(Boolean with_content)
+        {
+            String ret = String.Empty;
+
+            if (this.IsRequest)
+            {
+                /* Method SP Request_URI SP SIP_Version CRLF */
+                // Method
+                ret += String.Format("{0} ", (this as TSIP_Request).Method);
+                // Request URI (without quotes but with params)
+                ret += (this as TSIP_Request).Uri.ToString(true, false);
+                // SIP_Version
+                ret += String.Format(" {0}\r\n", TSIP_MESSAGE_VERSION_DEFAULT);
+            }
+            else
+            {
+                /*SIP_Version SP Status_Code SP Reason_Phrase CRLF*/
+                ret += String.Format("{0} {1} {2}\r\n",
+                    TSIP_MESSAGE_VERSION_DEFAULT,
+                    (this as TSIP_Response).StatusCode,
+                    (this as TSIP_Response).ReasonPhrase);
+            }
+
+            // First Via
+            if (this.FirstVia != null) ret += this.FirstVia;
+            // From
+            if (this.From != null) ret += this.From;
+            // To
+            if (this.To != null) ret += this.To;
+            // Contact
+            if (this.Contact != null) ret += this.Contact;
+            // Call-Id
+            if (this.CallId != null) ret += this.CallId;
+            // CSeq
+            if (this.CSeq != null) ret += this.CSeq;
+            // Expires
+            if (this.Expires != null) ret += this.Expires;
+            // ContentType
+            if (this.ContentType != null) ret += this.ContentType;
+            // Content-Length
+            if (this.ContentLength != null) ret += this.ContentLength;
+            // All other headers
+            foreach (TSIP_Header header in this.Headers) ret += header;
+
+            // Empty line before the content
+            ret += "\r\n";
+
+            // add content as string
+            if (with_content && this.Content != null)
+            {
+#if WINDOWS_PHONE
+                ret += Encoding.UTF8.GetString(this.Content, 0, this.Content.Length);
+#else
+                ret += Encoding.UTF8.GetString(this.Content);
+#endif
+            }
+
+            return ret;
+        }
+
+        public Boolean AddHeader(TSIP_Header header)
+        {
+            if (header != null)
+            {
+                return this.AddHeaders(new TSIP_Header[] { header });
+            }
+            return false;
+        }
+
+        public Boolean AddHeaders(List<TSIP_Header> headers)
+        {
+            if (headers != null)
+            {
+                return this.AddHeaders(headers.ToArray());
+            }
+            return false;
         }
 
         public Boolean AddHeaders(TSIP_Header[] headers)
@@ -256,6 +372,8 @@ namespace Doubango_CSharp.tinySIP
 
             foreach(TSIP_Header header in headers)
             {
+                if (header == null) continue;
+                
                 switch(header.Type)
                 {
                     case TSIP_Header.tsip_header_type_t.Via:
@@ -343,17 +461,6 @@ namespace Doubango_CSharp.tinySIP
             }
 
             return true;
-        }
-
-        public Boolean AddHeaders(List<TSIP_Header> headers)
-        {
-            if(headers == null)
-            {
-                TSK_Debug.Error("Invalid paramerer");
-                return false;
-            }
-
-            return this.AddHeaders(headers.ToArray());
         }
 
         public Boolean AddContent(String contentType, byte[]content)
@@ -517,7 +624,7 @@ namespace Doubango_CSharp.tinySIP
             }
             return 0;
         }
-       
+
         public static tsip_request_type_t GetRequestType(String method)
         {
             if (String.IsNullOrEmpty(method))
@@ -597,10 +704,45 @@ namespace Doubango_CSharp.tinySIP
         private TSIP_Uri mUri;
         private tsip_request_type_t mRequestType;
 
+        public TSIP_Request(String method, TSIP_Uri requestUri, TSIP_Uri fromUri, TSIP_Uri toUri, String callId, Int32 cseq)
+            :base(tsip_message_type_t.Request)
+        {
+            /* RFC 3261 8.1.1 Generating the Request
+		        A valid SIP request formulated by a UAC MUST, at a minimum, contain
+		        the following header fields: To, From, CSeq, Call-ID, Max-Forwards,
+		        and Via; all of these header fields are mandatory in all SIP
+		        requests.  These six header fields are the fundamental building
+		        blocks of a SIP message, as they jointly provide for most of the
+		        critical message routing services including the addressing of
+		        messages, the routing of responses, limiting message propagation,
+		        ordering of messages, and the unique identification of transactions.
+		        These header fields are in addition to the mandatory request line,
+		        which contains the method, Request-URI, and SIP version.
+	        */
+            this.Method = method;
+            this.Uri = requestUri;
+            this.AddHeaders(new TSIP_Header[]
+                {
+                    toUri == null ? null : new TSIP_HeaderTo(toUri.DisplayName, toUri, null),
+                    fromUri == null ? null : new TSIP_HeaderFrom(fromUri.DisplayName, toUri, null),
+                    /* Via will be added by the transport layer */
+                    new TSIP_HeaderCSeq((uint)cseq, method),
+                    String.IsNullOrEmpty(callId) ? null : new TSIP_HeaderCallId(callId),
+                    new TSIP_HeaderMaxForwards(TSIP_HeaderMaxForwards.TSIP_HEADER_MAX_FORWARDS_DEFAULT),
+                    /* Content-Length is mandatory for TCP. If both from and to are not null this means that it's a valid request */
+                   toUri != null && fromUri != null ? new TSIP_HeaderContentLength(0) : null,
+                }
+            );
+        }
+
         public String Method
         {
             get { return mMethod; }
-            set { mMethod = value; }
+            set 
+            { 
+                mMethod = value;
+                mRequestType = TSIP_Message.GetRequestType(mMethod);
+            }
         }
 
         public TSIP_Uri Uri
@@ -612,7 +754,6 @@ namespace Doubango_CSharp.tinySIP
         public tsip_request_type_t RequestType
         {
             get { return mRequestType; }
-            set { mRequestType = value; }
         }
     }
 
@@ -628,6 +769,72 @@ namespace Doubango_CSharp.tinySIP
     {
         private ushort mStatusCode;
         private String mReasonPhrase;
+
+        public TSIP_Response(ushort statusScode, String reasonPhrase, TSIP_Request request)
+            : base(tsip_message_type_t.Response)
+        {
+            this.StatusCode = statusScode;
+            this.ReasonPhrase = reasonPhrase;
+            this.AddHeaders(
+                    new TSIP_Header[]
+                    {
+                        /* Content-Length is mandatory for TCP */
+                        new TSIP_HeaderContentLength(0),
+                    }
+                );
+            if (request != null)
+            {
+                /*
+				RFC 3261 - 8.2.6.2 Headers and Tags
+
+				The From field of the response MUST equal the From header field of
+				the request.  The Call-ID header field of the response MUST equal the
+				Call-ID header field of the request.  The CSeq header field of the
+				response MUST equal the CSeq field of the request.  The Via header
+				field values in the response MUST equal the Via header field values
+				in the request and MUST maintain the same ordering.
+
+				If a request contained a To tag in the request, the To header field
+				in the response MUST equal that of the request.  However, if the To
+				header field in the request did not contain a tag, the URI in the To
+				header field in the response MUST equal the URI in the To header
+				field; additionally, the UAS MUST add a tag to the To header field in
+				the response (with the exception of the 100 (Trying) response, in
+				which a tag MAY be present).  This serves to identify the UAS that is
+				responding, possibly resulting in a component of a dialog ID.  The
+				same tag MUST be used for all responses to that request, both final
+				and provisional (again excepting the 100 (Trying)).  Procedures for
+				the generation of tags are defined in Section 19.3.
+				*/
+                this.From = request.From;
+                this.To = request.To;
+				this.CallId = request.CallId;
+                this.CSeq = request.CSeq;
+                this.FirstVia = request.FirstVia;		
+				/* All other VIAs */
+                if(this.FirstVia != null)
+                {
+                    int index = 1;
+                    TSIP_HeaderVia via;
+                    while((via = (request.GetHeaderAtIndex(tsip_header_type_t.Via, index++) as TSIP_HeaderVia)) != null)
+                    {
+                        this.AddHeaders(new TSIP_Header[]{via});
+                    }
+                }
+				/* Record routes */
+#if WINDOWS_PHONE
+                foreach (TSIP_Header header in request.Headers)
+                {
+                    if (header.Type == tsip_header_type_t.Record_Route)
+                    {
+                        this.AddHeader(header);
+                    }
+                }
+#else
+                this.AddHeaders(request.Headers.FindAll((x) => { return x.Type == tsip_header_type_t.Record_Route; }));
+#endif
+            }
+        }
 
         public ushort StatusCode
         {

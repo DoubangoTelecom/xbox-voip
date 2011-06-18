@@ -55,9 +55,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Doubango_CSharp.tinySAK;
+using Doubango.tinySAK;
 
-namespace Doubango_CSharp.tinySIP.Headers
+namespace Doubango.tinySIP.Headers
 {
     public class TSIP_HeaderDummy : TSIP_Header
     {

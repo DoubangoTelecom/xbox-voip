@@ -22,9 +22,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Doubango_CSharp.tinySAK;
+using Doubango.tinySAK;
 
-namespace Doubango_CSharp.tinySIP
+namespace Doubango.tinySIP
 {
     /// <summary>
     /// Sip Uri types
@@ -143,9 +143,14 @@ namespace Doubango_CSharp.tinySIP
             return TSIP_Uri.Serialize(this, true, true);
         }
 
-        public override string ToString()
+        public override String ToString()
         {
-            return TSIP_Uri.ToString(this, true, true);
+            return this.ToString(true, true);
+        }
+
+        public String ToString(Boolean with_params, Boolean with_quote)
+        {
+            return TSIP_Uri.Serialize(this, with_params, with_quote);
         }
 
         public TSIP_Uri Clone()

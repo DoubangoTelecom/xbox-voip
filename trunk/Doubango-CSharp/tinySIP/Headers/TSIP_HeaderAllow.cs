@@ -31,10 +31,10 @@
 
 
 using System;
-using Doubango_CSharp.tinySAK;
+using Doubango.tinySAK;
 using System.Collections.Generic;
 
-namespace Doubango_CSharp.tinySIP.Headers
+namespace Doubango.tinySIP.Headers
 {
     public class TSIP_HeaderAllow : TSIP_Header
     {
@@ -70,9 +70,24 @@ namespace Doubango_CSharp.tinySIP.Headers
 
 		public Boolean IsAllowed(String method)
 		{
+            if(String.IsNullOrEmpty(method))
+            {
+                return false;
+            }
+#if WINDOWS_PHONE
+            foreach (String _method in this.Methods)
+            {
+                if (String.Equals(_method, method, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+#else
 			return this.Methods.Exists(
                 (x) => { return x.Equals(method, StringComparison.InvariantCultureIgnoreCase); }
             );
+#endif
 		}
 		
 		public override String Value
@@ -100,7 +115,7 @@ namespace Doubango_CSharp.tinySIP.Headers
         }
 		
 		
-/* #line 104 "../Headers/TSIP_HeaderAllow.cs" */
+/* #line 119 "../Headers/TSIP_HeaderAllow.cs" */
 static readonly sbyte[] _tsip_machine_parser_header_Allow_actions =  new sbyte [] {
 	0, 1, 0, 1, 1, 1, 2
 };
@@ -178,7 +193,7 @@ const int tsip_machine_parser_header_Allow_error = 0;
 const int tsip_machine_parser_header_Allow_en_main = 1;
 
 
-/* #line 128 "./ragel/tsip_parser_header_Allow.rl" */
+/* #line 143 "./ragel/tsip_parser_header_Allow.rl" */
 
 		public static TSIP_HeaderAllow Parse(String data)
 		{
@@ -192,14 +207,14 @@ const int tsip_machine_parser_header_Allow_en_main = 1;
 
 			
 			
-/* #line 196 "../Headers/TSIP_HeaderAllow.cs" */
+/* #line 211 "../Headers/TSIP_HeaderAllow.cs" */
 	{
 	cs = tsip_machine_parser_header_Allow_start;
 	}
 
-/* #line 141 "./ragel/tsip_parser_header_Allow.rl" */
+/* #line 156 "./ragel/tsip_parser_header_Allow.rl" */
 			
-/* #line 203 "../Headers/TSIP_HeaderAllow.cs" */
+/* #line 218 "../Headers/TSIP_HeaderAllow.cs" */
 	{
 	sbyte _klen;
 	sbyte _trans;
@@ -294,7 +309,7 @@ _match:
 	{
 	}
 	break;
-/* #line 298 "../Headers/TSIP_HeaderAllow.cs" */
+/* #line 313 "../Headers/TSIP_HeaderAllow.cs" */
 		default: break;
 		}
 	}
@@ -308,12 +323,12 @@ _again:
 	_out: {}
 	}
 
-/* #line 142 "./ragel/tsip_parser_header_Allow.rl" */
+/* #line 157 "./ragel/tsip_parser_header_Allow.rl" */
 			
 			if( cs < 
-/* #line 315 "../Headers/TSIP_HeaderAllow.cs" */
+/* #line 330 "../Headers/TSIP_HeaderAllow.cs" */
 18
-/* #line 143 "./ragel/tsip_parser_header_Allow.rl" */
+/* #line 158 "./ragel/tsip_parser_header_Allow.rl" */
  ){
 				TSK_Debug.Error("Failed to parse SIP 'Allow' header.");
 				hdr_allow.Dispose();

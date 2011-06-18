@@ -21,19 +21,18 @@
 * along with XBox-Voip.
 */
 
-
 /***********************************
 *	Ragel state machine.
 */
 
-/* #line 94 "./ragel/tsip_parser_header_Contact.rl" */
+/* #line 93 "./ragel/tsip_parser_header_Contact.rl" */
 
 
 using System;
-using Doubango_CSharp.tinySAK;
+using Doubango.tinySAK;
 using System.Collections.Generic;
 
-namespace Doubango_CSharp.tinySIP.Headers
+namespace Doubango.tinySIP.Headers
 {
     public class TSIP_HeaderContact : TSIP_Header
 	{
@@ -89,7 +88,7 @@ namespace Doubango_CSharp.tinySIP.Headers
         }
 
 		
-/* #line 93 "../Headers/TSIP_HeaderContact.cs" */
+/* #line 92 "../Headers/TSIP_HeaderContact.cs" */
 static readonly sbyte[] _tsip_machine_parser_header_Contact_actions =  new sbyte [] {
 	0, 1, 0, 1, 1, 1, 2, 1, 
 	3, 1, 4, 1, 5, 1, 6, 1, 
@@ -435,7 +434,7 @@ const int tsip_machine_parser_header_Contact_error = 0;
 const int tsip_machine_parser_header_Contact_en_main = 1;
 
 
-/* #line 156 "./ragel/tsip_parser_header_Contact.rl" */
+/* #line 155 "./ragel/tsip_parser_header_Contact.rl" */
 
 		public static List<TSIP_HeaderContact> Parse(String data)
 		{
@@ -450,14 +449,14 @@ const int tsip_machine_parser_header_Contact_en_main = 1;
 
 			
 			
-/* #line 454 "../Headers/TSIP_HeaderContact.cs" */
+/* #line 453 "../Headers/TSIP_HeaderContact.cs" */
 	{
 	cs = tsip_machine_parser_header_Contact_start;
 	}
 
-/* #line 170 "./ragel/tsip_parser_header_Contact.rl" */
+/* #line 169 "./ragel/tsip_parser_header_Contact.rl" */
 			
-/* #line 461 "../Headers/TSIP_HeaderContact.cs" */
+/* #line 460 "../Headers/TSIP_HeaderContact.cs" */
 	{
 	sbyte _klen;
 	short _trans;
@@ -532,13 +531,13 @@ _match:
 		switch ( _tsip_machine_parser_header_Contact_actions[_acts++] )
 		{
 	case 0:
-/* #line 32 "./ragel/tsip_parser_header_Contact.rl" */
+/* #line 31 "./ragel/tsip_parser_header_Contact.rl" */
 	{
 		tag_start = p;
 	}
 	break;
 	case 1:
-/* #line 36 "./ragel/tsip_parser_header_Contact.rl" */
+/* #line 35 "./ragel/tsip_parser_header_Contact.rl" */
 	{
 		if(curr_contact == null){
 			curr_contact = new TSIP_HeaderContact();
@@ -546,7 +545,7 @@ _match:
 	}
 	break;
 	case 2:
-/* #line 42 "./ragel/tsip_parser_header_Contact.rl" */
+/* #line 41 "./ragel/tsip_parser_header_Contact.rl" */
 	{
 		if(curr_contact != null){
 			curr_contact.DisplayName = TSK_RagelState.Parser.GetString(data, p, tag_start);
@@ -555,7 +554,7 @@ _match:
 	}
 	break;
 	case 3:
-/* #line 49 "./ragel/tsip_parser_header_Contact.rl" */
+/* #line 48 "./ragel/tsip_parser_header_Contact.rl" */
 	{
 		if(curr_contact != null && curr_contact.Uri == null){
 			int len = (int)(p  - tag_start);
@@ -567,7 +566,7 @@ _match:
 	}
 	break;
 	case 4:
-/* #line 59 "./ragel/tsip_parser_header_Contact.rl" */
+/* #line 58 "./ragel/tsip_parser_header_Contact.rl" */
 	{
 		if(curr_contact != null){
 			curr_contact.Expires = TSK_RagelState.Parser.GetInt64(data, p, tag_start);
@@ -575,7 +574,7 @@ _match:
 	}
 	break;
 	case 5:
-/* #line 65 "./ragel/tsip_parser_header_Contact.rl" */
+/* #line 64 "./ragel/tsip_parser_header_Contact.rl" */
 	{
 		if(curr_contact != null){
 			curr_contact.Params = TSK_RagelState.Parser.AddParam(data, p, tag_start, curr_contact.Params);
@@ -583,7 +582,7 @@ _match:
 	}
 	break;
 	case 6:
-/* #line 71 "./ragel/tsip_parser_header_Contact.rl" */
+/* #line 70 "./ragel/tsip_parser_header_Contact.rl" */
 	{
 		if(curr_contact != null){
 			hdr_contacts.Add(curr_contact);
@@ -592,11 +591,11 @@ _match:
 	}
 	break;
 	case 7:
-/* #line 78 "./ragel/tsip_parser_header_Contact.rl" */
+/* #line 77 "./ragel/tsip_parser_header_Contact.rl" */
 	{
 	}
 	break;
-/* #line 600 "../Headers/TSIP_HeaderContact.cs" */
+/* #line 599 "../Headers/TSIP_HeaderContact.cs" */
 		default: break;
 		}
 	}
@@ -610,12 +609,12 @@ _again:
 	_out: {}
 	}
 
-/* #line 171 "./ragel/tsip_parser_header_Contact.rl" */
+/* #line 170 "./ragel/tsip_parser_header_Contact.rl" */
 			
 			if( cs < 
-/* #line 617 "../Headers/TSIP_HeaderContact.cs" */
+/* #line 616 "../Headers/TSIP_HeaderContact.cs" */
 126
-/* #line 172 "./ragel/tsip_parser_header_Contact.rl" */
+/* #line 171 "./ragel/tsip_parser_header_Contact.rl" */
  ){
 				TSK_Debug.Error("Failed to parse SIP 'Contact' header.");
 				hdr_contacts.Clear();

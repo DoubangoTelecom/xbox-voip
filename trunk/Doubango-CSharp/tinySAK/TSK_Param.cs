@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Doubango_CSharp.tinySAK
+namespace Doubango.tinySAK
 {
     public class TSK_Param
     {
@@ -114,9 +114,21 @@ namespace Doubango_CSharp.tinySAK
                 return @params;
             }
 
+#if WINDOWS_PHONE
+            again:
+            foreach (TSK_Param param in @params)
+            {
+                if (String.Equals(param.Name, name, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    @params.Remove(param);
+                    goto again;
+                }
+            }
+#else
             @params.RemoveAll(
                  (x) => { return x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase); }
             );
+#endif
 
             return @params;
         }

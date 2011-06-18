@@ -1,5 +1,5 @@
-/*
-* Copyright (C) 2010-2011 Mamadou Diop.
+/* Copyright (C) 2010-2011 Mamadou Diop. 
+* Copyright (C) 2011 Doubango Telecom <http://www.doubango.org>
 *
 * Contact: Mamadou Diop <diopmamadou(at)doubango.org>
 *	
@@ -17,15 +17,8 @@
 *	
 * You should have received a copy of the GNU General Public License
 * along with XBox-Voip.
-*
 */
-/**@file tsip_machine_message.rl
- * @brief Ragel file.
- *
- * @author Mamadou Diop <diopmamadou(at)doubango.org>
- *
 
- */
 %%{
 	machine tsip_machine_message;
 
@@ -34,7 +27,7 @@
 	SIP_Version = ("SIP"i "/" DIGIT+ "." DIGIT+) >tag %parse_sipversion;
 	
 	action prev_not_comma{
-		prev_not_comma(p)
+		PrevNotComma(state, p)
 	}
 
 	message_header = any+>tag :>(CRLF when prev_not_comma) %parse_header;

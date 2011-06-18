@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Doubango_CSharp.tinySAK;
+using Doubango.tinySAK;
 
-namespace Doubango_CSharp.tinySIP.Headers
+namespace Doubango.tinySIP.Headers
 {
     public abstract class TSIP_Header : IDisposable
     {
@@ -154,7 +154,7 @@ namespace Doubango_CSharp.tinySIP.Headers
 
         public override String ToString()
         {
-            return this.ToString(false, false, false);
+            return this.ToString(true, true, true);
         }
 
         public String ToString(Boolean with_name, Boolean with_crlf, Boolean with_params)

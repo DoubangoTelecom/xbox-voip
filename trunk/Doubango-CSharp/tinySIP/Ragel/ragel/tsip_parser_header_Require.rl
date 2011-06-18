@@ -48,10 +48,10 @@
 
 
 using System;
-using Doubango_CSharp.tinySAK;
+using Doubango.tinySAK;
 using System.Collections.Generic;
 
-namespace Doubango_CSharp.tinySIP.Headers
+namespace Doubango.tinySIP.Headers
 {
     public class TSIP_HeaderRequire : TSIP_Header
 	{
@@ -72,7 +72,17 @@ namespace Doubango_CSharp.tinySIP.Headers
 		{
             if (options != null)
             {
+#if WINDOWS_PHONE
+                foreach (String option in options)
+                {
+                    if (!String.IsNullOrEmpty(option))
+                    {
+                        this.Options.Add(option);
+                    }
+                }
+#else
                 this.Options.AddRange(options.FindAll((x) => { return !String.IsNullOrEmpty(x); }));
+#endif
             }
 		}
 
@@ -112,9 +122,20 @@ namespace Doubango_CSharp.tinySIP.Headers
 
 		public Boolean IsRequired(String option)
 		{
+#if WINDOWS_PHONE
+            foreach (String _option in this.Options)
+            {
+                if (String.Equals(option, _option, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+#else
 			return this.Options.Exists(
                 (x) => { return x.Equals(option, StringComparison.InvariantCultureIgnoreCase); }
             );
+#endif
 		}
 
 		%%write data;

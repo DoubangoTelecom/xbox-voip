@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Doubango_CSharp.tinySAK
+namespace Doubango.tinySAK
 {
     public class TSK_Buffer
     {

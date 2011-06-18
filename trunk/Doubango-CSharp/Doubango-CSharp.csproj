@@ -8,8 +8,8 @@
     <ProjectGuid>{EF99F654-A5A1-4CB0-B598-1E3AD1ABAD30}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Doubango_CSharp</RootNamespace>
-    <AssemblyName>Doubango-CSharp</AssemblyName>
+    <RootNamespace>Doubango</RootNamespace>
+    <AssemblyName>Doubango</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -87,10 +87,15 @@
     <Compile Include="tinySIP\Headers\TSIP_HeaderDummy.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderExpires.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderFrom.cs" />
+    <Compile Include="tinySIP\Headers\TSIP_HeaderMaxForwards.cs" />
+    <Compile Include="tinySIP\Headers\TSIP_HeaderRecordRoute.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderRequire.cs" />
+    <Compile Include="tinySIP\Headers\TSIP_HeaderRoute.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderSupported.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderTo.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderVia.cs" />
+    <Compile Include="tinySIP\Parsers\TSIP_ParserHeader.cs" />
+    <Compile Include="tinySIP\Parsers\TSIP_ParserMessage.cs" />
     <Compile Include="tinySIP\Parsers\TSIP_ParserUri.cs" />
     <Compile Include="tinySIP\Transactions\TSIP_Transac.cs" />
     <Compile Include="tinySIP\Transactions\TSIP_TransacICT.cs" />

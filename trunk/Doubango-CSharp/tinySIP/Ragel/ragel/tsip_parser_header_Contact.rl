@@ -19,7 +19,6 @@
 * along with XBox-Voip.
 */
 
-
 /***********************************
 *	Ragel state machine.
 */
@@ -94,10 +93,10 @@
 }%%
 
 using System;
-using Doubango_CSharp.tinySAK;
+using Doubango.tinySAK;
 using System.Collections.Generic;
 
-namespace Doubango_CSharp.tinySIP.Headers
+namespace Doubango.tinySIP.Headers
 {
     public class TSIP_HeaderContact : TSIP_Header
 	{

@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Doubango_CSharp.tinySIP.Transactions
+namespace Doubango.tinySIP.Transactions
 {
     public class TSIP_TransacNICT : TSIP_Transac
     {

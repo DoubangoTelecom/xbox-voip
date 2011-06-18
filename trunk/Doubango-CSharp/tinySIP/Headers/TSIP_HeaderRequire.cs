@@ -30,10 +30,10 @@
 
 
 using System;
-using Doubango_CSharp.tinySAK;
+using Doubango.tinySAK;
 using System.Collections.Generic;
 
-namespace Doubango_CSharp.tinySIP.Headers
+namespace Doubango.tinySIP.Headers
 {
     public class TSIP_HeaderRequire : TSIP_Header
 	{
@@ -54,7 +54,17 @@ namespace Doubango_CSharp.tinySIP.Headers
 		{
             if (options != null)
             {
+#if WINDOWS_PHONE
+                foreach (String option in options)
+                {
+                    if (!String.IsNullOrEmpty(option))
+                    {
+                        this.Options.Add(option);
+                    }
+                }
+#else
                 this.Options.AddRange(options.FindAll((x) => { return !String.IsNullOrEmpty(x); }));
+#endif
             }
 		}
 
@@ -94,13 +104,24 @@ namespace Doubango_CSharp.tinySIP.Headers
 
 		public Boolean IsRequired(String option)
 		{
+#if WINDOWS_PHONE
+            foreach (String _option in this.Options)
+            {
+                if (String.Equals(option, _option, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+#else
 			return this.Options.Exists(
                 (x) => { return x.Equals(option, StringComparison.InvariantCultureIgnoreCase); }
             );
+#endif
 		}
 
 		
-/* #line 104 "../Headers/TSIP_HeaderRequire.cs" */
+/* #line 125 "../Headers/TSIP_HeaderRequire.cs" */
 static readonly sbyte[] _tsip_machine_parser_header_Require_actions =  new sbyte [] {
 	0, 1, 0, 1, 1, 1, 2
 };
@@ -176,7 +197,7 @@ const int tsip_machine_parser_header_Require_error = 0;
 const int tsip_machine_parser_header_Require_en_main = 1;
 
 
-/* #line 121 "./ragel/tsip_parser_header_Require.rl" */
+/* #line 142 "./ragel/tsip_parser_header_Require.rl" */
 
 		public static TSIP_HeaderRequire Parse(String data)
 		{
@@ -189,14 +210,14 @@ const int tsip_machine_parser_header_Require_en_main = 1;
 			int tag_start = 0;
 			
 			
-/* #line 193 "../Headers/TSIP_HeaderRequire.cs" */
+/* #line 214 "../Headers/TSIP_HeaderRequire.cs" */
 	{
 	cs = tsip_machine_parser_header_Require_start;
 	}
 
-/* #line 133 "./ragel/tsip_parser_header_Require.rl" */
+/* #line 154 "./ragel/tsip_parser_header_Require.rl" */
 			
-/* #line 200 "../Headers/TSIP_HeaderRequire.cs" */
+/* #line 221 "../Headers/TSIP_HeaderRequire.cs" */
 	{
 	sbyte _klen;
 	sbyte _trans;
@@ -287,7 +308,7 @@ _match:
 	{
 	}
 	break;
-/* #line 291 "../Headers/TSIP_HeaderRequire.cs" */
+/* #line 312 "../Headers/TSIP_HeaderRequire.cs" */
 		default: break;
 		}
 	}
@@ -301,12 +322,12 @@ _again:
 	_out: {}
 	}
 
-/* #line 134 "./ragel/tsip_parser_header_Require.rl" */
+/* #line 155 "./ragel/tsip_parser_header_Require.rl" */
 			
 			if( cs < 
-/* #line 308 "../Headers/TSIP_HeaderRequire.cs" */
+/* #line 329 "../Headers/TSIP_HeaderRequire.cs" */
 19
-/* #line 135 "./ragel/tsip_parser_header_Require.rl" */
+/* #line 156 "./ragel/tsip_parser_header_Require.rl" */
  ){
 				TSK_Debug.Error("Failed to parse SIP 'Require' header.");
 				hdr_require.Dispose();

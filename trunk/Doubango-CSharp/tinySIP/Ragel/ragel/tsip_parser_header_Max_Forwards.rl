@@ -1,7 +1,7 @@
-/*
-* Copyright (C) 2010-2011 Mamadou Diop.
+/* Copyright (C) 2010-2011 Mamadou Diop. 
+* Copyright (C) 2011 Doubango Telecom <http://www.doubango.org>
 *
-* Contact: Mamadou Diop <diopmamadou(at)doubango.org>
+* Contact: Mamadou Diop <diopmamadou(at)doubango(dot)org>
 *	
 * This file is part of Open Source Xbox-VoIP Project <http://code.google.com/p/xbox-voip/>
 *
@@ -17,24 +17,7 @@
 *	
 * You should have received a copy of the GNU General Public License
 * along with XBox-Voip.
-*
 */
-
-/**@file tsip_header_Max_Forwards.c
- * @brief SIP Max-Forwards header.
- *
- * @author Mamadou Diop <diopmamadou(at)doubango.org>
- *
-
- */
-#include "tinysip/headers/tsip_header_Max_Forwards.h"
-
-#include "tinysip/parsers/tsip_parser_uri.h"
-
-#include "tsk_debug.h"
-#include "tsk_memory.h"
-
-
 
 /***********************************
 *	Ragel state machine.
@@ -50,7 +33,7 @@
 	}
 	
 	action parse_value{
-		TSK_PARSER_SET_INTEGER(hdr_maxf->value);
+		hdr_maxf.MaxForward = TSK_RagelState.Parser.GetInt32(data, p, tag_start);
 	}
 
 	action eob{
@@ -63,89 +46,79 @@
 
 }%%
 
+using System;
+using Doubango.tinySAK;
 
-tsip_header_Max_Forwards_t* tsip_header_Max_Forwards_create(int32_t max)
+namespace Doubango.tinySIP.Headers
 {
-	return tsk_object_new(TSIP_HEADER_MAX_FORWARDS_VA_ARGS(max));
-}
+    public class TSIP_HeaderMaxForwards : TSIP_Header
+	{
+		private Int32 mMaxForw;
 
-int tsip_header_Max_Forwards_serialize(const tsip_header_t* header, tsk_buffer_t* output)
-{
-	if(header){
-		const tsip_header_Max_Forwards_t *Max_Forwards = (const tsip_header_Max_Forwards_t *)header;
-		if(Max_Forwards->value >= 0){
-			return tsk_buffer_append_2(output, "%d", Max_Forwards->value);
+		public const Int32 TSIP_HEADER_MAX_FORWARDS_NONE = -1;
+		public const Int32 TSIP_HEADER_MAX_FORWARDS_DEFAULT = 70;
+
+		public TSIP_HeaderMaxForwards()
+            : this(TSIP_HEADER_MAX_FORWARDS_NONE)
+        {
+        }
+		
+		public TSIP_HeaderMaxForwards(Int32 maxForw)
+            : base(tsip_header_type_t.Max_Forwards)
+        {
+			mMaxForw = maxForw;
+        }
+
+		public override String Value
+        {
+            get 
+            { 
+               return this.MaxForward.ToString();
+            }
+            set
+            {
+                Int32 maxForw;
+                if (Int32.TryParse(value, out maxForw))
+                {
+                    this.MaxForward = maxForw;
+                }
+            }
+        }
+
+		public Int32 MaxForward
+        {
+            get 
+            { 
+               return mMaxForw;
+            }
+            set
+            {
+                mMaxForw = value;
+            }
+        }
+
+		%%write data;
+
+		public static TSIP_HeaderMaxForwards Parse(String data)
+		{
+			int cs = 0;
+			int p = 0;
+			int pe = data.Length;
+			int eof = pe;
+			TSIP_HeaderMaxForwards hdr_maxf = new TSIP_HeaderMaxForwards();
+			
+			int tag_start = 0;
+
+			%%write init;
+			%%write exec;
+			
+			if( cs < %%{ write first_final; }%% ){
+				TSK_Debug.Error("Failed to parse SIP 'Content-Length' header.");
+				hdr_maxf.Dispose();
+				hdr_maxf = null;
+			}
+			
+			return hdr_maxf;
 		}
-		return 0;
 	}
-
-	return -1;
 }
-
-tsip_header_Max_Forwards_t *tsip_header_Max_Forwards_parse(const char *data, tsk_size_t size)
-{
-	int cs = 0;
-	const char *p = data;
-	const char *pe = p + size;
-	const char *eof = pe;
-	tsip_header_Max_Forwards_t *hdr_maxf = tsip_header_Max_Forwards_create(TSIP_HEADER_MAX_FORWARDS_NONE);
-	
-	const char *tag_start;
-
-	%%write data;
-	%%write init;
-	%%write exec;
-	
-	if( cs < %%{ write first_final; }%% ){
-		TSK_DEBUG_ERROR("Failed to parse 'Max-Forward' header.");
-		TSK_OBJECT_SAFE_FREE(hdr_maxf);
-	}
-	
-	return hdr_maxf;
-}
-
-
-
-
-
-
-
-//========================================================
-//	Max_Forwards header object definition
-//
-
-static tsk_object_t* tsip_header_Max_Forwards_ctor(tsk_object_t *self, va_list * app)
-{
-	tsip_header_Max_Forwards_t *Max_Forwards = self;
-	if(Max_Forwards){
-		TSIP_HEADER(Max_Forwards)->type = tsip_htype_Max_Forwards;
-		TSIP_HEADER(Max_Forwards)->serialize = tsip_header_Max_Forwards_serialize;
-		Max_Forwards->value = va_arg(*app, int32_t);
-	}
-	else{
-		TSK_DEBUG_ERROR("Failed to create new Max_Forwards header.");
-	}
-	return self;
-}
-
-static tsk_object_t* tsip_header_Max_Forwards_dtor(tsk_object_t *self)
-{
-	tsip_header_Max_Forwards_t *Max_Forwards = self;
-	if(Max_Forwards){
-		TSK_OBJECT_SAFE_FREE(TSIP_HEADER_PARAMS(Max_Forwards));
-	}
-	else{
-		TSK_DEBUG_ERROR("Null Max_Forwards header.");
-	}
-
-	return self;
-}
-
-static const tsk_object_def_t tsip_header_Max_Forwards_def_s = 
-{
-	sizeof(tsip_header_Max_Forwards_t),
-	tsip_header_Max_Forwards_ctor,
-	tsip_header_Max_Forwards_dtor,
-	tsk_null
-};
-const tsk_object_def_t *tsip_header_Max_Forwards_def_t = &tsip_header_Max_Forwards_def_s;

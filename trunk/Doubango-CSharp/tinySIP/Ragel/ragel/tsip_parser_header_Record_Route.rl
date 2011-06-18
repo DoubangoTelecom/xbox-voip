@@ -1,7 +1,7 @@
-/*
-* Copyright (C) 2010-2011 Mamadou Diop.
+/* Copyright (C) 2010-2011 Mamadou Diop. 
+* Copyright (C) 2011 Doubango Telecom <http://www.doubango.org>
 *
-* Contact: Mamadou Diop <diopmamadou(at)doubango.org>
+* Contact: Mamadou Diop <diopmamadou(at)doubango(dot)org>
 *	
 * This file is part of Open Source Xbox-VoIP Project <http://code.google.com/p/xbox-voip/>
 *
@@ -17,26 +17,7 @@
 *	
 * You should have received a copy of the GNU General Public License
 * along with XBox-Voip.
-*
 */
-
-/**@file tsip_header_Record_Route.c
- * @brief SIP Record-Route header.
- *
- * @author Mamadou Diop <diopmamadou(at)doubango.org>
- *
-
- */
-#include "tinysip/headers/tsip_header_Record_Route.h"
-
-#include "tinysip/parsers/tsip_parser_uri.h"
-
-#include "tsk_debug.h"
-#include "tsk_memory.h"
-#include "tsk_time.h"
-
-#include <string.h>
-
 
 
 /***********************************
@@ -53,38 +34,38 @@
 	}
 	
 	action create_route{
-		if(!curr_route){
-			curr_route = tsip_header_Record_Route_create_null();
+		if(curr_route == null){
+			curr_route = new TSIP_HeaderRecordRoute();
 		}
 	}
 
 	action parse_display_name{
-		if(curr_route){
-			TSK_PARSER_SET_STRING(curr_route->display_name);
-			tsk_strunquote(&curr_route->display_name);
+		if(curr_route != null){
+			curr_route.DisplayName = TSK_RagelState.Parser.GetString(data, p, tag_start);
+			curr_route.DisplayName = TSK_String.UnQuote(curr_route.DisplayName);
 		}
 	}
 
 	action parse_uri{
-		if(curr_route && !curr_route->uri){
+		if(curr_route != null && curr_route.Uri == null){
 			int len = (int)(p  - tag_start);
-			if(curr_route && !curr_route->uri){
-				if((curr_route->uri = tsip_uri_parse(tag_start, (tsk_size_t)len)) && curr_route->display_name){
-					curr_route->uri->display_name = tsk_strdup(curr_route->display_name);
-				}
+            if ((curr_route.Uri = TSIP_ParserUri.Parse(data.Substring(tag_start, len))) != null && !String.IsNullOrEmpty(curr_route.DisplayName))
+            {
+                curr_route.Uri.DisplayName = curr_route.DisplayName;
 			}
 		}
 	}
 
 	action parse_param{
-		if(curr_route){
-			TSK_PARSER_ADD_PARAM(TSIP_HEADER_PARAMS(curr_route));
+		if(curr_route != null){
+			curr_route.Params = TSK_RagelState.Parser.AddParam(data, p, tag_start, curr_route.Params);
 		}
 	}
 
 	action add_route{
-		if(curr_route){
-			tsk_list_push_back_data(hdr_record_routes, ((void**) &curr_route));
+		if(curr_route != null){
+			hdr_record_routes.Add(curr_route);
+            curr_route = null;
 		}
 	}
 
@@ -104,104 +85,76 @@
 
 }%%
 
+using System;
+using Doubango.tinySAK;
+using System.Collections.Generic;
 
-tsip_header_Record_Route_t* tsip_header_Record_Route_create(const tsip_uri_t* uri)
+namespace Doubango.tinySIP.Headers
 {
-	return tsk_object_new(TSIP_HEADER_RECORD_ROUTE_VA_ARGS(uri));
-}
+    public class TSIP_HeaderRecordRoute : TSIP_Header
+	{
+		private String mDisplayName;
+		private TSIP_Uri mUri;
 
-tsip_header_Record_Route_t* tsip_header_Record_Route_create_null()
-{
-	return tsip_header_Record_Route_create(tsk_null);
-}
+		public TSIP_HeaderRecordRoute()
+            : this(null)
+        {
+        }
 
-int tsip_header_Record_Route_serialize(const tsip_header_t* header, tsk_buffer_t* output)
-{
-	if(header){
-		int ret;
-		const tsip_header_Record_Route_t *Record_Route = (const tsip_header_Record_Route_t *)header;
+		public TSIP_HeaderRecordRoute(TSIP_Uri uri)
+            : base(tsip_header_type_t.Record_Route)
+        {
+			mUri = uri;
+        }
 
-		/* Uri with hacked display-name*/
-		if((ret = tsip_uri_serialize(Record_Route->uri, tsk_true, tsk_true, output))){
-			return ret;
+		public override String Value
+        {
+            get 
+            { 
+				// Uri with hacked display-name
+                return  TSIP_Uri.Serialize(this.Uri, true, true);
+            }
+            set { TSK_Debug.Error("Not implemented"); }
+        }
+
+		public String DisplayName
+        {
+            get { return mDisplayName; }
+            set { mDisplayName = value; }
+        }
+		
+		public TSIP_Uri Uri
+        {
+            get { return mUri; }
+            set { mUri = value; }
+        }
+
+		%%write data;
+
+		public static List<TSIP_HeaderRecordRoute> Parse(String data)
+		{
+			int cs = 0;
+			int p = 0;
+			int pe = data.Length;
+			int eof = pe;
+			List<TSIP_HeaderRecordRoute> hdr_record_routes = new List<TSIP_HeaderRecordRoute>();
+			TSIP_HeaderRecordRoute curr_route = null;
+
+			int tag_start = 0;
+
+			
+			%%write init;
+			%%write exec;
+			
+			if( cs < %%{ write first_final; }%% ){
+				TSK_Debug.Error("Failed to parse SIP 'Record-Route' header.");
+				hdr_record_routes.Clear();
+				hdr_record_routes = null;
+				curr_route.Dispose();
+				curr_route = null;
+			}
+			
+			return hdr_record_routes;
 		}
-		return ret;
 	}
-	return -1;
 }
-
- tsip_header_Record_Routes_L_t* tsip_header_Record_Route_parse(const char *data, tsk_size_t size)
-{
-	int cs = 0;
-	const char *p = data;
-	const char *pe = p + size;
-	const char *eof = pe;
-	tsip_header_Record_Routes_L_t *hdr_record_routes = tsk_list_create();
-	tsip_header_Record_Route_t *curr_route = tsk_null;
-	
-	const char *tag_start;
-
-	%%write data;
-	%%write init;
-	%%write exec;
-	
-	if( cs < %%{ write first_final; }%% ){
-		TSK_DEBUG_ERROR("Failed to parse 'Record-Route' header.");
-		TSK_OBJECT_SAFE_FREE(curr_route);
-		TSK_OBJECT_SAFE_FREE(hdr_record_routes);
-	}
-	
-	return hdr_record_routes;
-}
-
-
-
-
-
-
-
-//========================================================
-//	Record_Route header object definition
-//
-
-static tsk_object_t* tsip_header_Record_Route_ctor(tsk_object_t *self, va_list * app)
-{
-	tsip_header_Record_Route_t *Record_Route = self;
-	if(Record_Route){
-		const tsip_uri_t* uri = va_arg(*app, const tsip_uri_t *);
-
-		if(uri){
-			Record_Route->uri = tsk_object_ref((void*)uri);
-		}
-		TSIP_HEADER(Record_Route)->type = tsip_htype_Record_Route;
-		TSIP_HEADER(Record_Route)->serialize = tsip_header_Record_Route_serialize;
-	}
-	else{
-		TSK_DEBUG_ERROR("Failed to create new Record_Route header.");
-	}
-	return self;
-}
-
-static tsk_object_t* tsip_header_Record_Route_dtor(tsk_object_t *self)
-{
-	tsip_header_Record_Route_t *Record_Route = self;
-	if(Record_Route){
-		TSK_FREE(Record_Route->display_name);
-		TSK_OBJECT_SAFE_FREE(Record_Route->uri);
-		TSK_OBJECT_SAFE_FREE(TSIP_HEADER_PARAMS(Record_Route));
-	}
-	else{
-		TSK_DEBUG_ERROR("Null Record_Route header.");
-	}
-
-	return self;
-}
-
-static const tsk_object_def_t tsip_header_Record_Route_def_s = 
-{
-	sizeof(tsip_header_Record_Route_t),
-	tsip_header_Record_Route_ctor,
-	tsip_header_Record_Route_dtor,
-	tsk_null
-};
-const tsk_object_def_t *tsip_header_Record_Route_def_t = &tsip_header_Record_Route_def_s;

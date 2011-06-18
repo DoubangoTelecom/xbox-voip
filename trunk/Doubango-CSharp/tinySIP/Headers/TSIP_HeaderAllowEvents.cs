@@ -31,10 +31,10 @@
 
 
 using System;
-using Doubango_CSharp.tinySAK;
+using Doubango.tinySAK;
 using System.Collections.Generic;
 
-namespace Doubango_CSharp.tinySIP.Headers
+namespace Doubango.tinySIP.Headers
 {
     public class TSIP_HeaderAllowEvents : TSIP_Header
 	{
@@ -92,13 +92,25 @@ namespace Doubango_CSharp.tinySIP.Headers
 		
 		public Boolean IsEventAllowed(String @event)
 		{
+ 
+#if WINDOWS_PHONE
+            foreach (String _event in this.Events)
+            {
+                if (String.Equals(_event, @event, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+#else
 			return this.Events.Exists(
                 (x) => { return x.Equals(@event, StringComparison.InvariantCultureIgnoreCase); }
             );
+#endif
 		}
 
 		
-/* #line 102 "../Headers/TSIP_HeaderAllowEvents.cs" */
+/* #line 114 "../Headers/TSIP_HeaderAllowEvents.cs" */
 static readonly sbyte[] _tsip_machine_parser_header_Allow_events_actions =  new sbyte [] {
 	0, 1, 0, 1, 1, 1, 2
 };
@@ -186,7 +198,7 @@ const int tsip_machine_parser_header_Allow_events_error = 0;
 const int tsip_machine_parser_header_Allow_events_en_main = 1;
 
 
-/* #line 127 "./ragel/tsip_parser_header_Allow_Events.rl" */
+/* #line 139 "./ragel/tsip_parser_header_Allow_Events.rl" */
 
 		public static TSIP_HeaderAllowEvents Parse(String data)
 		{
@@ -200,14 +212,14 @@ const int tsip_machine_parser_header_Allow_events_en_main = 1;
 
 			
 			
-/* #line 204 "../Headers/TSIP_HeaderAllowEvents.cs" */
+/* #line 216 "../Headers/TSIP_HeaderAllowEvents.cs" */
 	{
 	cs = tsip_machine_parser_header_Allow_events_start;
 	}
 
-/* #line 140 "./ragel/tsip_parser_header_Allow_Events.rl" */
+/* #line 152 "./ragel/tsip_parser_header_Allow_Events.rl" */
 			
-/* #line 211 "../Headers/TSIP_HeaderAllowEvents.cs" */
+/* #line 223 "../Headers/TSIP_HeaderAllowEvents.cs" */
 	{
 	sbyte _klen;
 	byte _trans;
@@ -302,7 +314,7 @@ _match:
 	{
 	}
 	break;
-/* #line 306 "../Headers/TSIP_HeaderAllowEvents.cs" */
+/* #line 318 "../Headers/TSIP_HeaderAllowEvents.cs" */
 		default: break;
 		}
 	}
@@ -316,12 +328,12 @@ _again:
 	_out: {}
 	}
 
-/* #line 141 "./ragel/tsip_parser_header_Allow_Events.rl" */
+/* #line 153 "./ragel/tsip_parser_header_Allow_Events.rl" */
 			
 			if( cs < 
-/* #line 323 "../Headers/TSIP_HeaderAllowEvents.cs" */
+/* #line 335 "../Headers/TSIP_HeaderAllowEvents.cs" */
 25
-/* #line 142 "./ragel/tsip_parser_header_Allow_Events.rl" */
+/* #line 154 "./ragel/tsip_parser_header_Allow_Events.rl" */
  ){
 				TSK_Debug.Error("Failed to parse SIP 'Allow' header.");
 				Allow_Events.Dispose();
