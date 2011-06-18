@@ -1,0 +1,220 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.20506</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{461EA7A9-8436-4E93-995C-1FE6D7257053}</ProjectGuid>
+    <ProjectTypeGuids>{C089C8C0-30E0-4E22-80C0-CE093F111A43};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Doubango</RootNamespace>
+    <AssemblyName>Doubango</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
+    <TargetFrameworkProfile>WindowsPhone71</TargetFrameworkProfile>
+    <TargetFrameworkIdentifier>Silverlight</TargetFrameworkIdentifier>
+    <SilverlightApplication>false</SilverlightApplication>
+    <ValidateXaml>true</ValidateXaml>
+    <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Bin\Release</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System.Windows" />
+    <Reference Include="system" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Net" />
+    <Reference Include="mscorlib.extensions" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_Buffer.cs">
+      <Link>tinySAK\TSK_Buffer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_Debug.cs">
+      <Link>tinySAK\TSK_Debug.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_Param.cs">
+      <Link>tinySAK\TSK_Param.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_RagelState.cs">
+      <Link>tinySAK\TSK_RagelState.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_String.cs">
+      <Link>tinySAK\TSK_String.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_Dialog.cs">
+      <Link>tinySIP\Dialogs\TSIP_Dialog.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogInvite.cdiv.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogInvite.cdiv.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogInvite.client.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogInvite.client.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogInvite.common.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogInvite.common.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogInvite.conf.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogInvite.conf.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogInvite.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogInvite.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogInvite.ect.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogInvite.ect.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogInvite.hold.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogInvite.hold.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogInvite.qos.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogInvite.qos.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogInvite.server.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogInvite.server.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogInvite.timers.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogInvite.timers.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogLayer.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogLayer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogMessage.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogOptions.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogOptions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogPublish.client.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogPublish.client.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogPublish.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogPublish.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogPublish.server.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogPublish.server.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogRegister.client.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogRegister.client.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogRegister.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogRegister.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogRegister.server.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogRegister.server.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogSubscribe.client.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogSubscribe.client.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogSubscribe.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogSubscribe.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogSubscribe.server.cs">
+      <Link>tinySIP\Dialogs\TSIP_DialogSubscribe.server.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_Header.cs">
+      <Link>tinySIP\Headers\TSIP_Header.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderAllow.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderAllow.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderAllowEvents.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderAllowEvents.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderCallId.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderCallId.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderContact.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderContact.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderContentLength.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderContentLength.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderContentType.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderContentType.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderCSeq.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderCSeq.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderDummy.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderDummy.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderExpires.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderExpires.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderFrom.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderFrom.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderMaxForwards.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderMaxForwards.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderRecordRoute.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderRecordRoute.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderRequire.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderRequire.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderRoute.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderRoute.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderSupported.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderSupported.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderTo.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderTo.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderVia.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderVia.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Parsers\TSIP_ParserHeader.cs">
+      <Link>tinySIP\Parsers\TSIP_ParserHeader.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Parsers\TSIP_ParserMessage.cs">
+      <Link>tinySIP\Parsers\TSIP_ParserMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Parsers\TSIP_ParserUri.cs">
+      <Link>tinySIP\Parsers\TSIP_ParserUri.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\TSIP_Message.cs">
+      <Link>tinySIP\TSIP_Message.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\TSip_Session.cs">
+      <Link>tinySIP\TSip_Session.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\TSIP_Uri.cs">
+      <Link>tinySIP\TSIP_Uri.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />
+  <ProjectExtensions />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
