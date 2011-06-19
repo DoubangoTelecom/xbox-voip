@@ -22,10 +22,119 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Doubango.tinyNET;
+using Doubango.tinySAK;
 
 namespace Doubango.tinySIP.Transports
 {
-    public abstract class TSIP_Transport
+    public abstract class TSIP_Transport : IDisposable
     {
+        private String mHost;
+        private ushort mPort;
+        private TNET_Socket.tnet_socket_type_t mType;
+        private String mDescription;
+        private TNET_Socket mMasterSocket;
+        private Boolean mPrepared;
+
+        public event EventHandler<TransportEventArgs> NetworkEvent;
+
+        public TSIP_Transport(String host, ushort port, TNET_Socket.tnet_socket_type_t type, String description)
+        {
+            mHost = host;
+            mPort = port;
+            mType = type;
+            mDescription = description;
+
+            mMasterSocket = new TNET_Socket(host, port, type);
+        }
+
+        ~TSIP_Transport()
+        {
+            this.Dispose();
+        }
+
+        public void Dispose()
+        {
+            
+        }
+
+        public String Host
+        {
+            get { return mHost; }
+        }
+
+        public ushort Port
+        {
+            get { return mPort; }
+        }
+
+        public TNET_Socket.tnet_socket_type_t Type
+        {
+            get { return mType; }
+        }
+
+        public String Description
+        {
+            get { return mDescription; }
+        }
+
+        public Boolean Isprepared
+        {
+            get { return mPrepared; }
+        }
+
+
+
+        /// <summary>
+        /// Trasport event class
+        /// </summary>
+        public class TransportEventArgs : TSK_EventArgs
+        {
+            public enum TransportEventTypes
+            {
+               Data,
+               Closed,
+               Error,
+               Connected,
+               Accepted
+            }
+
+            private readonly TransportEventTypes mType;
+            private readonly byte[] mData;
+            private readonly Object mContext;
+            private IntPtr mLocalSocketHandle;
+
+            public TransportEventArgs(TransportEventTypes type, byte[] data, Object context, IntPtr localSocketHandle)
+            {
+                mType = type;
+                mData = data;
+                mContext = context;
+                mLocalSocketHandle = localSocketHandle;
+            }
+
+            public TransportEventTypes Type
+            {
+                get { return mType; }
+            }
+
+            private byte[] Data
+            {
+                get { return mData; }
+            }
+
+            private Object Context
+            {
+                get { return mContext; }
+            }
+
+            private IntPtr LocalSocketHandle
+            {
+                get { return mLocalSocketHandle; }
+            }
+
+
+
+
+        }
     }
 }

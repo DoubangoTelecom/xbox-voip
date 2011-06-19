@@ -28,6 +28,7 @@ using System.Text;
 using Doubango.tinySIP;
 using Doubango.Tests.SIP;
 using Doubango.tinySIP.Headers;
+using Doubango.tinyNET;
 
 namespace Doubango_CSharp
 {
@@ -35,6 +36,8 @@ namespace Doubango_CSharp
     {
         static void Main(string[] args)
         {
+            TNET_Socket socket = new TNET_Socket(TNET_Socket.tnet_socket_type_t.tnet_socket_type_udp_ipv4);
+
             //Test_UriParser.TestUriParser();
             Test_UriParser.TestMessageParser();
 
