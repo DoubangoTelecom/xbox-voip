@@ -163,6 +163,11 @@ namespace Doubango.tinySIP
             return new TSIP_Uri(type);
         }
 
+        public static TSIP_Uri Create(String uri)
+        {
+            return TSIP_ParserUri.Parse(uri);
+        }
+
         private static String _InternalSerialize(TSIP_Uri uri, Boolean with_params)
         {
             /* sip:alice:secretword@atlanta.com:65535 */

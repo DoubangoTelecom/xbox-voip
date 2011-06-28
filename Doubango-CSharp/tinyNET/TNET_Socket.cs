@@ -79,24 +79,40 @@ namespace Doubango.tinyNET
         public const String TNET_SOCKET_HOST_ANY = null;
         public const ushort TNET_SOCKET_PORT_ANY = 0;
 
+        public static Int64 sUniqueId = 0;
 
-        private Socket mSocket;
-        private String mHost;
-        private ushort mPort;
-        private tnet_socket_type_t mType; 
+        private readonly Int64 mId;
+        private readonly Socket mSocket;
+        private readonly SocketAsyncEventArgs mSocketEventArgs;
+        private readonly String mHost;
+        private readonly ushort mPort;
+        private readonly tnet_socket_type_t mType;
 
         public TNET_Socket(String host, ushort port, tnet_socket_type_t type, Boolean nonblocking, Boolean bindsocket)
         {
+            mId = ++sUniqueId;
             mType = type;
             mHost = host;
             mPort = port;
 
+            mSocketEventArgs = new SocketAsyncEventArgs();
+            mSocketEventArgs.Completed += delegate(object sender, SocketAsyncEventArgs e)
+            {
+                // To be implemented
+            };
+
             AddressFamily addressFamily = TNET_Socket.IsIPv6Type(type) ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork;
             SocketType socketType = TNET_Socket.IsStreamType(type) ? SocketType.Stream : SocketType.Dgram;
+#if WINDOWS_PHONE
+            ProtocolType protocolType = ProtocolType.Unspecified; 
+#else
             ProtocolType protocolType = TNET_Socket.IsIPv6Type(type) ? ProtocolType.IP : ProtocolType.IP; // Leave it like this
+#endif
             mSocket = new Socket(addressFamily, socketType, protocolType);
+#if !WINDOWS_PHONE
             mSocket.Blocking = !nonblocking;
             mSocket.UseOnlyOverlappedIO = true;
+#endif
             
             if (bindsocket)
             {
@@ -107,10 +123,14 @@ namespace Doubango.tinyNET
                 {
                     ushort localPort = (port == TNET_SOCKET_PORT_ANY) ? (ushort)0 : port;
                     IPEndPoint localIEP = new IPEndPoint(ipAddress, localPort);
+#if !WINDOWS_PHONE
                     mSocket.Bind(localIEP);
+#endif
                     if (TNET_Socket.IsDatagramType(type))
                     {
+ #if !WINDOWS_PHONE 
                         mPort = (ushort)(mSocket.LocalEndPoint as IPEndPoint).Port;
+#endif
                     }
                 }
             }
@@ -135,7 +155,10 @@ namespace Doubango.tinyNET
         {
             if (mSocket != null && mSocket.Connected)
             {
+                mSocket.Shutdown(SocketShutdown.Both);
+#if !WINDOWS_PHONE
                 mSocket.Disconnect(true);
+#endif
             }
         }
 
@@ -154,9 +177,9 @@ namespace Doubango.tinyNET
             get { return mPort; }
         }
 
-        public IntPtr Handle
+        public Int64 Id
         {
-            get { return mSocket != null ? mSocket.Handle : IntPtr.Zero; }
+            get { return mId; }
         }
 
         public Boolean IsValid
@@ -222,6 +245,26 @@ namespace Doubango.tinyNET
             get { return this.IsIPSec || this.IsTLS; }
         }
 
+        public Int32 SendTo(IPEndPoint remoteEP, byte[] buffer)
+        {
+            try
+            {
+#if WINDOWS_PHONE
+                mSocketEventArgs.SetBuffer(buffer, 0, buffer.Length);
+                mSocketEventArgs.RemoteEndPoint = remoteEP;
+                return mSocket.SendToAsync(mSocketEventArgs) ? buffer.Length : -1;
+#else
+                
+                return mSocket.SendTo(buffer, remoteEP);
+#endif
+            }
+            catch (Exception e)
+            {
+                TSK_Debug.Error("SendTo() failed: {0}", e);
+            }
+            return -1;
+        }
+
         private static Boolean IsIPv4Type(tnet_socket_type_t type)
         {
             return (((int)type & TNET_SOCKET_TYPE_IPV4) == TNET_SOCKET_TYPE_IPV4);
@@ -242,6 +285,18 @@ namespace Doubango.tinyNET
             return (((int)type & TNET_SOCKET_TYPE_UDP) == TNET_SOCKET_TYPE_UDP);
         }
 
-        
+        public static IPEndPoint CreateEndPoint(String host, ushort port)
+        {
+            try
+            {
+                var ipAddress = IPAddress.Parse(host);
+                return new IPEndPoint(ipAddress, port);
+            }
+            catch (Exception e)
+            {
+                TSK_Debug.Error("CreateEndPoint failed: {0}", e);
+            }
+            return null;
+        }
     }
 }

@@ -32,34 +32,48 @@ namespace Doubango.tinyNET
     {
         public static IPAddress GetBestLocalIPAddress(String host, TNET_Socket.tnet_socket_type_t type)
         {
-            String localHostNameOrAddress = (host == TNET_Socket.TNET_SOCKET_HOST_ANY) ? Dns.GetHostName() : host;
-            IPAddress[] ipAddresses = Dns.GetHostAddresses(localHostNameOrAddress);
-            IPAddress ipAddress = null;
-            if (ipAddresses != null && ipAddresses.Length > 0)
+            try
             {
-                ipAddress = ipAddresses[0];
-                foreach (IPAddress ia in ipAddresses)
+#if WINDOWS_PHONE
+                String localHostNameOrAddress = (host == TNET_Socket.TNET_SOCKET_HOST_ANY) ? "localhost" : host; // Not use yet
+                IPAddress[] ipAddresses = new IPAddress[] { TNET_Socket.IsIPv6Type(type) ? IPAddress.IPv6Any : IPAddress.Any }; // FIXME: didn't found how to get local IP on WP7
+#else
+                String localHostNameOrAddress = (host == TNET_Socket.TNET_SOCKET_HOST_ANY) ? Dns.GetHostName() : host;
+                IPAddress[] ipAddresses = Dns.GetHostAddresses(localHostNameOrAddress);
+#endif
+                IPAddress ipAddress = null;
+                Boolean useIPv6 = TNET_Socket.IsIPv6Type(type);
+                if (ipAddresses != null && ipAddresses.Length > 0)
                 {
-                    if ((ia.AddressFamily == AddressFamily.InterNetwork && (IPAddress.Loopback.ToString().Equals(ia.ToString())))
-                        || (ia.AddressFamily == AddressFamily.InterNetworkV6 && (IPAddress.IPv6Loopback.ToString().Equals(ia.ToString()))))
+                    ipAddress = ipAddresses[0];
+                    foreach (IPAddress ia in ipAddresses)
                     {
-                        continue;
-                    }
-                    if ((ia.AddressFamily == AddressFamily.InterNetwork) || (ia.AddressFamily == AddressFamily.InterNetworkV6 && !ia.IsIPv6LinkLocal))
-                    {
-                        ipAddress = ia;
-                        break;
+                        if ((ia.AddressFamily == AddressFamily.InterNetwork && (IPAddress.Loopback.ToString().Equals(ia.ToString())))
+                            || (ia.AddressFamily == AddressFamily.InterNetworkV6 && (IPAddress.IPv6Loopback.ToString().Equals(ia.ToString()))))
+                        {
+                            continue;
+                        }
+                        if ((ia.AddressFamily == AddressFamily.InterNetwork && !useIPv6) || (ia.AddressFamily == AddressFamily.InterNetworkV6 && !ia.IsIPv6LinkLocal && useIPv6))
+                        {
+                            ipAddress = ia;
+                            break;
+                        }
                     }
                 }
-            }
 
-            if (ipAddress == null)
+                if (ipAddress == null)
+                {
+                    TSK_Debug.Error("{0} is an invalid hostname or address", localHostNameOrAddress);
+                    ipAddress = TNET_Socket.IsIPv6Type(type) ? IPAddress.IPv6Any : IPAddress.Any;
+                }
+
+                return ipAddress;
+            }
+            catch (Exception e)
             {
-                TSK_Debug.Error("{0} is an invalid hostname or address", localHostNameOrAddress);
-                ipAddress = TNET_Socket.IsIPv6Type(type) ? IPAddress.IPv6Any : IPAddress.Any;
+                TSK_Debug.Error("GetBestLocalIPAddress(host={0}) failed: ", host, e);
             }
-
-            return ipAddress;
+            return TNET_Socket.IsIPv6Type(type) ? IPAddress.IPv6Any : IPAddress.Any;
         }
     }
 }

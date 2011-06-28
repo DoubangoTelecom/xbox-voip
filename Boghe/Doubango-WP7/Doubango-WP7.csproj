@@ -49,11 +49,23 @@
     <Reference Include="mscorlib.extensions" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Doubango-CSharp\tinyNET\TNET_Socket.cs">
+      <Link>tinyNET\TNET_Socket.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinyNET\TNET_Transport.cs">
+      <Link>tinyNET\TNET_Transport.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinyNET\TNET_Utils.cs">
+      <Link>tinyNET\TNET_Utils.cs</Link>
+    </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_Buffer.cs">
       <Link>tinySAK\TSK_Buffer.cs</Link>
     </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_Debug.cs">
       <Link>tinySAK\TSK_Debug.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_EventArgs.cs">
+      <Link>tinySAK\TSK_EventArgs.cs</Link>
     </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_Param.cs">
       <Link>tinySAK\TSK_Param.cs</Link>
@@ -195,6 +207,42 @@
     </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySIP\Parsers\TSIP_ParserUri.cs">
       <Link>tinySIP\Parsers\TSIP_ParserUri.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Transactions\TSIP_Transac.cs">
+      <Link>tinySIP\Transactions\TSIP_Transac.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Transactions\TSIP_TransacICT.cs">
+      <Link>tinySIP\Transactions\TSIP_TransacICT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Transactions\TSIP_TransacIST.cs">
+      <Link>tinySIP\Transactions\TSIP_TransacIST.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Transactions\TSIP_TransacLayer.cs">
+      <Link>tinySIP\Transactions\TSIP_TransacLayer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Transactions\TSIP_TransacNICT.cs">
+      <Link>tinySIP\Transactions\TSIP_TransacNICT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Transactions\TSIP_TransacNIST.cs">
+      <Link>tinySIP\Transactions\TSIP_TransacNIST.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Transports\TSIP_Transport.cs">
+      <Link>tinySIP\Transports\TSIP_Transport.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Transports\TSIP_TransportIPSec.cs">
+      <Link>tinySIP\Transports\TSIP_TransportIPSec.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Transports\TSIP_TransportLayer.cs">
+      <Link>tinySIP\Transports\TSIP_TransportLayer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Transports\TSIP_TransportTCP.cs">
+      <Link>tinySIP\Transports\TSIP_TransportTCP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Transports\TSIP_TransportTLS.cs">
+      <Link>tinySIP\Transports\TSIP_TransportTLS.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Transports\TSIP_TransportUDP.cs">
+      <Link>tinySIP\Transports\TSIP_TransportUDP.cs</Link>
     </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySIP\TSIP_Message.cs">
       <Link>tinySIP\TSIP_Message.cs</Link>
