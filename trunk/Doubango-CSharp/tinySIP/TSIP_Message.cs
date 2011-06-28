@@ -279,7 +279,11 @@ namespace Doubango.tinySIP
                 {
                     stream.Write(this.Content, 0, this.Content.Length);
                 }
+#if PUBLICLY_VISIBLE_BUFFER
                 bytes = stream.GetBuffer();
+#else
+                bytes = stream.ToArray(); // Will create a copy
+#endif
             }
             return bytes;
        }
@@ -632,59 +636,59 @@ namespace Doubango.tinySIP
                 return tsip_request_type_t.NONE;
             }
 
-            if (method.Equals("ACK", StringComparison.InvariantCultureIgnoreCase))
+            if (method.Equals(TSIP_Request.METHOD_ACK, StringComparison.InvariantCultureIgnoreCase))
             {
                 return tsip_request_type_t.ACK;
             }
-            else if (method.Equals("BYE", StringComparison.InvariantCultureIgnoreCase))
+            else if (method.Equals(TSIP_Request.METHOD_BYE, StringComparison.InvariantCultureIgnoreCase))
             {
                 return tsip_request_type_t.BYE;
             }
-            else if (method.Equals("CANCEL", StringComparison.InvariantCultureIgnoreCase))
+            else if (method.Equals(TSIP_Request.METHOD_CANCEL, StringComparison.InvariantCultureIgnoreCase))
             {
                 return tsip_request_type_t.CANCEL;
             }
-            else if (method.Equals("INVITE", StringComparison.InvariantCultureIgnoreCase))
+            else if (method.Equals(TSIP_Request.METHOD_INVITE, StringComparison.InvariantCultureIgnoreCase))
             {
                 return tsip_request_type_t.INVITE;
             }
-            else if (method.Equals("OPTIONS", StringComparison.InvariantCultureIgnoreCase))
+            else if (method.Equals(TSIP_Request.METHOD_OPTIONS, StringComparison.InvariantCultureIgnoreCase))
             {
                 return tsip_request_type_t.OPTIONS;
             }
-            else if (method.Equals("REGISTER", StringComparison.InvariantCultureIgnoreCase))
+            else if (method.Equals(TSIP_Request.METHOD_REGISTER, StringComparison.InvariantCultureIgnoreCase))
             {
                 return tsip_request_type_t.REGISTER;
             }
-            else if (method.Equals("SUBSCRIBE", StringComparison.InvariantCultureIgnoreCase))
+            else if (method.Equals(TSIP_Request.METHOD_SUBSCRIBE, StringComparison.InvariantCultureIgnoreCase))
             {
                 return tsip_request_type_t.SUBSCRIBE;
             }
-            else if (method.Equals("NOTIFY", StringComparison.InvariantCultureIgnoreCase))
+            else if (method.Equals(TSIP_Request.METHOD_NOTIFY, StringComparison.InvariantCultureIgnoreCase))
             {
                 return tsip_request_type_t.NOTIFY;
             }
-            else if (method.Equals("REFER", StringComparison.InvariantCultureIgnoreCase))
+            else if (method.Equals(TSIP_Request.METHOD_REFER, StringComparison.InvariantCultureIgnoreCase))
             {
                 return tsip_request_type_t.REFER;
             }
-            else if (method.Equals("INFO", StringComparison.InvariantCultureIgnoreCase))
+            else if (method.Equals(TSIP_Request.METHOD_INFO, StringComparison.InvariantCultureIgnoreCase))
             {
                 return tsip_request_type_t.INFO;
             }
-            else if (method.Equals("UPDATE", StringComparison.InvariantCultureIgnoreCase))
+            else if (method.Equals(TSIP_Request.METHOD_UPDATE, StringComparison.InvariantCultureIgnoreCase))
             {
                 return tsip_request_type_t.UPDATE;
             }
-            else if (method.Equals("MESSAGE", StringComparison.InvariantCultureIgnoreCase))
+            else if (method.Equals(TSIP_Request.METHOD_MESSAGE, StringComparison.InvariantCultureIgnoreCase))
             {
                 return tsip_request_type_t.MESSAGE;
             }
-            else if (method.Equals("PUBLISH", StringComparison.InvariantCultureIgnoreCase))
+            else if (method.Equals(TSIP_Request.METHOD_PUBLISH, StringComparison.InvariantCultureIgnoreCase))
             {
                 return tsip_request_type_t.PUBLISH;
             }
-            else if (method.Equals("PRACK", StringComparison.InvariantCultureIgnoreCase))
+            else if (method.Equals(TSIP_Request.METHOD_PRACK, StringComparison.InvariantCultureIgnoreCase))
             {
                 return tsip_request_type_t.PRACK;
             }
@@ -703,6 +707,21 @@ namespace Doubango.tinySIP
         private String mMethod;
         private TSIP_Uri mUri;
         private tsip_request_type_t mRequestType;
+
+        public const String METHOD_ACK = "ACK";
+        public const String METHOD_BYE = "BYE";
+        public const String METHOD_CANCEL = "CANCEL";
+        public const String METHOD_INVITE = "INVITE";
+        public const String METHOD_OPTIONS = "OPTIONS";
+        public const String METHOD_REGISTER = "REGISTER";
+        public const String METHOD_SUBSCRIBE = "SUBSCRIBE";
+        public const String METHOD_NOTIFY = "NOTIFY";
+        public const String METHOD_REFER = "REFER";
+        public const String METHOD_INFO = "INFO";
+        public const String METHOD_UPDATE = "UPDATE";
+        public const String METHOD_MESSAGE = "MESSAGE";
+        public const String METHOD_PUBLISH = "PUBLISH";
+        public const String METHOD_PRACK = "PRACK";
 
         public TSIP_Request(String method, TSIP_Uri requestUri, TSIP_Uri fromUri, TSIP_Uri toUri, String callId, Int32 cseq)
             :base(tsip_message_type_t.Request)
