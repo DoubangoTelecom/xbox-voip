@@ -88,7 +88,7 @@ namespace Doubango.tinySAK
             set { mDebug = value; }
         }
 
-        public Boolean ExecuteAction(Int32 action, Object obj1, Object obj2, params Object[] parameters)
+        public Boolean ExecuteAction(Int32 action, Object condObj1, Object condObj2, params Object[] parameters)
         {
             Boolean found = false;
             Boolean terminates = false;
@@ -116,7 +116,7 @@ namespace Doubango.tinySAK
                 }
 
                 // check condition
-                if (entry.Condition == null || entry.Condition(obj1, obj2))
+                if (entry.Condition == null || entry.Condition(condObj1, condObj2))
                 {
                     // For debug information
                     if (mDebug)

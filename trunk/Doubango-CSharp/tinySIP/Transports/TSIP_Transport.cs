@@ -30,16 +30,15 @@ using System.Collections;
 
 namespace Doubango.tinySIP.Transports
 {
-    public abstract class TSIP_Transport : TNET_Transport
+    internal abstract class TSIP_Transport : TNET_Transport
     {
-
-        public TSIP_Transport(String host, ushort port, TNET_Socket.tnet_socket_type_t type, String description)
+        protected TSIP_Transport(String host, ushort port, TNET_Socket.tnet_socket_type_t type, String description)
             :base(host, port, type, description)
         {
             
         }
 
-        public TSIP_Transport(TNET_Socket.tnet_socket_type_t type, String description)
+        protected TSIP_Transport(TNET_Socket.tnet_socket_type_t type, String description)
             : base(TNET_Socket.TNET_SOCKET_HOST_ANY, TNET_Socket.TNET_SOCKET_PORT_ANY, type, description)
         {
 

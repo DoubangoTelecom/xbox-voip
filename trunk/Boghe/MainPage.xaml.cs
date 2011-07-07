@@ -30,13 +30,13 @@ namespace Boghe
         public MainPage()
         {
             InitializeComponent();
-            TSIP_Uri realm = TSIP_Uri.Create(String.Format("sip:{0}", DOMAIN));
-            TSIP_Uri publicIdentity = TSIP_Uri.Create(String.Format("sip:{0}@{1}", USER_NAME, DOMAIN));
+            //TSIP_Uri realm = TSIP_Uri.Create(String.Format("sip:{0}", DOMAIN));
+           // TSIP_Uri publicIdentity = TSIP_Uri.Create(String.Format("sip:{0}@{1}", USER_NAME, DOMAIN));
 
 
-            TSIP_Request sipRequest = new TSIP_Request(TSIP_Request.METHOD_OPTIONS, realm, publicIdentity, publicIdentity, TSIP_HeaderCallId.RandomCallId(), 0); 
-            TSIP_TransportUDP transportUdp = new TSIP_TransportUDP("Sip Transport");
-            transportUdp.SendTo(TNET_Socket.CreateEndPoint("192.168.0.10", 5060), sipRequest.ToBytes());
+            //TSIP_Request sipRequest = new TSIP_Request(TSIP_Request.METHOD_OPTIONS, realm, publicIdentity, publicIdentity, TSIP_HeaderCallId.RandomCallId(), 0); 
+           // TSIP_TransportUDP transportUdp = new TSIP_TransportUDP("Sip Transport");
+           // transportUdp.SendTo(TNET_Socket.CreateEndPoint("192.168.0.10", 5060), sipRequest.ToBytes());
 
         }
     }

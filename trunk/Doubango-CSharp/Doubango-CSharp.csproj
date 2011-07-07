@@ -35,13 +35,11 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Data.DataSetExtensions">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -49,6 +47,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tests\SIP\Test_UriParser.cs" />
     <Compile Include="Tests\Utils\Test_FSM.cs" />
+    <Compile Include="tinyHTTP\Headers\THTTP_Header.cs" />
     <Compile Include="tinyNET\TNET_Socket.cs" />
     <Compile Include="tinyNET\TNET_Transport.cs" />
     <Compile Include="tinyNET\TNET_Utils.cs" />
@@ -60,6 +59,7 @@
     <Compile Include="tinySAK\TSK_RagelState.cs" />
     <Compile Include="tinySAK\TSK_StateMachine.cs" />
     <Compile Include="tinySAK\TSK_String.cs" />
+    <Compile Include="tinySIP\Authentication\TSIP_Challenge.cs" />
     <Compile Include="tinySIP\Dialogs\TSIP_Dialog.cs" />
     <Compile Include="tinySIP\Dialogs\TSIP_DialogInvite.cdiv.cs" />
     <Compile Include="tinySIP\Dialogs\TSIP_DialogInvite.client.cs" />
@@ -83,6 +83,10 @@
     <Compile Include="tinySIP\Dialogs\TSIP_DialogSubscribe.client.cs" />
     <Compile Include="tinySIP\Dialogs\TSIP_DialogSubscribe.cs" />
     <Compile Include="tinySIP\Dialogs\TSIP_DialogSubscribe.server.cs" />
+    <Compile Include="tinySIP\Events\TSIP_Event.cs" />
+    <Compile Include="tinySIP\Events\TSIP_EventDialog.cs" />
+    <Compile Include="tinySIP\Events\TSIP_EventRegister.cs" />
+    <Compile Include="tinySIP\Events\TSIP_EventStack.cs" />
     <Compile Include="tinySIP\Headers\TSIP_Header.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderAllow.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderAllowEvents.cs" />
@@ -104,6 +108,8 @@
     <Compile Include="tinySIP\Parsers\TSIP_ParserHeader.cs" />
     <Compile Include="tinySIP\Parsers\TSIP_ParserMessage.cs" />
     <Compile Include="tinySIP\Parsers\TSIP_ParserUri.cs" />
+    <Compile Include="tinySIP\Sessions\TSip_Session.cs" />
+    <Compile Include="tinySIP\Sessions\TSIP_SessionRegister.cs" />
     <Compile Include="tinySIP\Transactions\TSIP_Transac.cs" />
     <Compile Include="tinySIP\Transactions\TSIP_TransacICT.cs" />
     <Compile Include="tinySIP\Transactions\TSIP_TransacIST.cs" />
@@ -116,8 +122,8 @@
     <Compile Include="tinySIP\Transports\TSIP_TransportLayer.cs" />
     <Compile Include="tinySIP\Transports\TSIP_TransportTLS.cs" />
     <Compile Include="tinySIP\Transports\TSIP_TransportUDP.cs" />
+    <Compile Include="tinySIP\TSIP_Action.cs" />
     <Compile Include="tinySIP\TSIP_Message.cs" />
-    <Compile Include="tinySIP\TSip_Session.cs" />
     <Compile Include="tinySIP\TSIP_Stack.cs" />
     <Compile Include="tinySIP\TSIP_Uri.cs" />
   </ItemGroup>
@@ -222,6 +228,9 @@
     <None Include="tinySIP\Ragel\ragel\tsip_parser_header_WWW_Authenticate.rl" />
     <None Include="tinySIP\Ragel\ragel\tsip_parser_message.rl" />
     <None Include="tinySIP\Ragel\ragel\tsip_parser_uri.rl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="tinyMEDIA\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -12,6 +12,11 @@ namespace Doubango.tinySAK
             return TSK_String.IndexOf(str, len, substring) >= 0;
         }
 
+        public static String Random()
+        {
+            return System.Guid.NewGuid().ToString();
+        }
+
         public static int IndexOf(String str, int len, String substring)
         {
             if (str != null && substring != null)

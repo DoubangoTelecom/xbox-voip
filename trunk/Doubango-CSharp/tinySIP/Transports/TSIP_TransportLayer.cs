@@ -22,10 +22,73 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using Doubango.tinyNET;
 
 namespace Doubango.tinySIP.Transports
 {
-    public class TSIP_TransportLayer
+    internal class TSIP_TransportLayer : IDisposable
     {
+        private readonly TSIP_Stack mStack;
+        private readonly Mutex mMutex;
+        private readonly List<TSIP_Transport> mTransports;
+        private Boolean mRunning;
+
+        internal TSIP_TransportLayer(TSIP_Stack stack)
+        {
+            mStack = stack;
+            mTransports = new List<TSIP_Transport>();
+#if WINDOWS_PHONE
+            mMutex = new Mutex(true, null);
+#else
+            mMutex = new Mutex();
+#endif
+        }
+
+        ~TSIP_TransportLayer()
+        {
+            this.Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (mMutex != null)
+            {
+                mMutex.Close();
+            }
+        }
+
+        internal Boolean IsRunning
+        {
+            get { return mRunning; }
+        }
+
+        internal Boolean AddTransport(String localHost, ushort localPort, TNET_Socket.tnet_socket_type_t type, String description)
+        {
+            TSIP_Transport transport = TNET_Socket.IsStreamType(type) ? (TSIP_Transport)new TSIP_TransportTCP(localHost, localPort, TNET_Socket.IsIPv6Type(type), description)
+                : (TSIP_Transport)new TSIP_TransportUDP(localHost, localPort, TNET_Socket.IsIPv6Type(type), description);
+
+            if (transport != null)
+            {
+                mTransports.Add(transport);
+            }
+
+            return (transport != null);
+        }
+
+        internal Boolean SendMessage(String branch, TSIP_Message message)
+        {
+            return false;
+        }
+
+        internal Boolean Start()
+        {
+            return true;
+        }
+
+        internal Boolean Stop()
+        {
+            return true;
+        }
     }
 }

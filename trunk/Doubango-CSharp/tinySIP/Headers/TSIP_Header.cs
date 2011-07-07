@@ -113,6 +113,11 @@ namespace Doubango.tinySIP.Headers
             mType = type;
         }
 
+        ~TSIP_Header()
+        {
+            this.Dispose();
+        }
+
         public void Dispose()
         {
         }

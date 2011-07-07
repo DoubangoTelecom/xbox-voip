@@ -79,6 +79,9 @@
     <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_String.cs">
       <Link>tinySAK\TSK_String.cs</Link>
     </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Authentication\TSIP_Challenge.cs">
+      <Link>tinySIP\Authentication\TSIP_Challenge.cs</Link>
+    </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_Dialog.cs">
       <Link>tinySIP\Dialogs\TSIP_Dialog.cs</Link>
     </Compile>
@@ -148,6 +151,18 @@
     <Compile Include="..\..\Doubango-CSharp\tinySIP\Dialogs\TSIP_DialogSubscribe.server.cs">
       <Link>tinySIP\Dialogs\TSIP_DialogSubscribe.server.cs</Link>
     </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Events\TSIP_Event.cs">
+      <Link>tinySIP\Events\TSIP_Event.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Events\TSIP_EventDialog.cs">
+      <Link>tinySIP\Events\TSIP_EventDialog.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Events\TSIP_EventRegister.cs">
+      <Link>tinySIP\Events\TSIP_EventRegister.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Events\TSIP_EventStack.cs">
+      <Link>tinySIP\Events\TSIP_EventStack.cs</Link>
+    </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_Header.cs">
       <Link>tinySIP\Headers\TSIP_Header.cs</Link>
     </Compile>
@@ -211,6 +226,12 @@
     <Compile Include="..\..\Doubango-CSharp\tinySIP\Parsers\TSIP_ParserUri.cs">
       <Link>tinySIP\Parsers\TSIP_ParserUri.cs</Link>
     </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Sessions\TSip_Session.cs">
+      <Link>tinySIP\Sessions\TSip_Session.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Sessions\TSIP_SessionRegister.cs">
+      <Link>tinySIP\Sessions\TSIP_SessionRegister.cs</Link>
+    </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySIP\Transactions\TSIP_Transac.cs">
       <Link>tinySIP\Transactions\TSIP_Transac.cs</Link>
     </Compile>
@@ -247,11 +268,14 @@
     <Compile Include="..\..\Doubango-CSharp\tinySIP\Transports\TSIP_TransportUDP.cs">
       <Link>tinySIP\Transports\TSIP_TransportUDP.cs</Link>
     </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\TSIP_Action.cs">
+      <Link>tinySIP\TSIP_Action.cs</Link>
+    </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySIP\TSIP_Message.cs">
       <Link>tinySIP\TSIP_Message.cs</Link>
     </Compile>
-    <Compile Include="..\..\Doubango-CSharp\tinySIP\TSip_Session.cs">
-      <Link>tinySIP\TSip_Session.cs</Link>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\TSIP_Stack.cs">
+      <Link>tinySIP\TSIP_Stack.cs</Link>
     </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySIP\TSIP_Uri.cs">
       <Link>tinySIP\TSIP_Uri.cs</Link>
