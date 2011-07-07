@@ -22,10 +22,97 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using Doubango.tinySAK;
 
 namespace Doubango.tinySIP.Dialogs
 {
-    public partial class TSIP_DialogLayer
+    internal partial class TSIP_DialogLayer : IDisposable
     {
+        private readonly TSIP_Stack mStack;
+        private readonly IDictionary<Int64,TSIP_Dialog> mDialogs;
+        private readonly Mutex mMutex;
+
+        internal TSIP_DialogLayer(TSIP_Stack stack)
+        {
+            mStack = stack;
+            mDialogs = new Dictionary<Int64, TSIP_Dialog>();
+#if WINDOWS_PHONE
+            mMutex = new Mutex(true, null);
+#else
+            mMutex = new Mutex();
+#endif
+        }
+
+        ~TSIP_DialogLayer()
+        {
+            this.Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (mMutex != null)
+            {
+                mMutex.Close();
+            }
+        }
+
+        internal TSIP_Dialog FindDialogBySessionId(Int64 sessionId)
+        {
+            TSIP_Dialog dialog = null;
+
+            mMutex.WaitOne();
+
+            mMutex.ReleaseMutex();
+
+            return dialog;
+        }
+
+        internal TSIP_Dialog CreateDialog(TSIP_Dialog.tsip_dialog_type_t type, TSip_Session sipSession)
+        {
+            TSIP_Dialog dialog = null;
+
+            switch (type)
+            {
+                case TSIP_Dialog.tsip_dialog_type_t.REGISTER:
+                    {
+                        break;
+                    }
+
+                default:
+                    {
+                        TSK_Debug.Error("{0} not support as dialog type", type);
+                        break;
+                    }
+            }
+
+            if (dialog != null && !mDialogs.ContainsKey(dialog.Id))
+            {
+                mMutex.WaitOne();
+                mDialogs.Add(dialog.Id, dialog);
+                mMutex.ReleaseMutex();
+            }
+
+            return dialog;
+        }
+
+        internal Boolean RemoveDialogById(Int64 dialogId)
+        {
+            mMutex.WaitOne();
+            mDialogs.Remove(dialogId);
+            mMutex.ReleaseMutex();
+
+            return true;
+        }
+
+        internal Boolean ShutdownAll()
+        {
+            return true;
+        }
+
+        internal Boolean HandleIncomingMessage(TSIP_Message message)
+        {
+            return false;
+        }
     }
 }

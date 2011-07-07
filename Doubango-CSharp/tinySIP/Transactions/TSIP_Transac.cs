@@ -25,7 +25,38 @@ using System.Text;
 
 namespace Doubango.tinySIP.Transactions
 {
-    public abstract class TSIP_Transac
+    internal abstract class TSIP_Transac : IDisposable, IEquatable<TSIP_Transac>
     {
+        private readonly Int64 mId;
+
+        private static Int64 sUniqueId = 0;
+
+        internal TSIP_Transac()
+        {
+            mId = sUniqueId++;
+        }
+
+        ~TSIP_Transac()
+        {
+            this.Dispose();
+        }
+
+        public void Dispose()
+        {
+        }
+
+        internal Int64 Id
+        {
+            get { return mId; }
+        }
+
+        public bool Equals(TSIP_Transac other)
+        {
+            if (other != null)
+            {
+                return this.Id == other.Id;
+            }
+            return false;
+        }
     }
 }

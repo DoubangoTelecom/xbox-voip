@@ -25,7 +25,7 @@ using System.Text;
 
 namespace Doubango.tinySIP.Transactions
 {
-    public class TSIP_TransacNICT : TSIP_Transac
+    internal class TSIP_TransacNICT : TSIP_Transac
     {
     }
 }

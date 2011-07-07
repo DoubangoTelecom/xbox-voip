@@ -25,7 +25,7 @@ using System.Text;
 
 namespace Doubango.tinySIP.Dialogs
 {
-    public partial class TSIP_DialogRegister
+    internal partial class TSIP_DialogRegister
     {
     }
 }

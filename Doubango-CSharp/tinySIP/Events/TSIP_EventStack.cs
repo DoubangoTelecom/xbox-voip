@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2010-2011 Mamadou Diop. 
+﻿/*Copyright (C) 2010-2011 Mamadou Diop.
 * Copyright (C) 2011 Doubango Telecom <http://www.doubango.org>
 *
 * Contact: Mamadou Diop <diopmamadou(at)doubango(dot)org>
@@ -22,30 +22,36 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Doubango.tinySAK;
-using Doubango.tinySIP.Sessions;
 
-namespace Doubango.tinySIP.Dialogs
+namespace Doubango.tinySIP.Events
 {
-    internal partial class TSIP_DialogRegister : TSIP_Dialog
+    public class TSIP_EventStack : TSIP_Event
     {
-        private readonly TSK_StateMachine mStateMachine;
-
-        internal TSIP_DialogRegister(TSIP_SessionRegister session, String callId)
-            :base(tsip_dialog_type_t.REGISTER, callId, session)
+        public enum tsip_stack_event_type_t
         {
-            
+            Started,
+            Stopped,
+            FailedToStart,
+            FailedToStop
+        };
+
+        private readonly tsip_stack_event_type_t mEventType;
+
+        internal TSIP_EventStack(tsip_stack_event_type_t eventType, String phrase)
+            :base(null, 0, phrase, null, tsip_event_type_t.STACK)
+        {
+            mEventType = eventType;
         }
 
-        internal TSIP_DialogRegister(TSIP_SessionRegister session)
-            : base(tsip_dialog_type_t.REGISTER, null, session)
+        internal static Boolean Signal(tsip_stack_event_type_t eventType, String phrase)
         {
-
+            TSIP_EventStack @event = new TSIP_EventStack(eventType, phrase);
+            return @event.Signal();
         }
 
-        internal override TSK_StateMachine StateMachine
+        public tsip_stack_event_type_t EventType
         {
-            get { return mStateMachine; }
+            get { return mEventType; }
         }
     }
 }

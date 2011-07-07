@@ -22,10 +22,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Doubango.tinySAK;
 
 namespace Doubango.tinySIP.Dialogs
 {
-    public partial class TSIP_DialogMessage : TSIP_Dialog
+    internal partial class TSIP_DialogMessage : TSIP_Dialog
     {
+        private readonly TSK_StateMachine mStateMachine;
+
+        internal TSIP_DialogMessage()
+            :base(tsip_dialog_type_t.MESSAGE, null, null)
+        {
+            
+        }
+
+        internal override TSK_StateMachine StateMachine
+        {
+            get { return mStateMachine; }
+        }
     }
 }

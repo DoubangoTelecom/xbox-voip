@@ -27,26 +27,26 @@ using Doubango.tinyNET;
 
 namespace Doubango.tinySIP.Transports
 {
-    public class TSIP_TransportUDP : TSIP_Transport
+    internal class TSIP_TransportUDP : TSIP_Transport
     {
-        public TSIP_TransportUDP(String host, ushort port, Boolean useIPv6, String description)
+        internal TSIP_TransportUDP(String host, ushort port, Boolean useIPv6, String description)
             : base(host, port, useIPv6 ? tnet_socket_type_t.tnet_socket_type_udp_ipv6 : tnet_socket_type_t.tnet_socket_type_udp_ipv4, description)
         {
 
         }
-        public TSIP_TransportUDP(String host, ushort port, String description)
+        internal TSIP_TransportUDP(String host, ushort port, String description)
             : this(host, port, false, description)
         {
 
         }
 
-        public TSIP_TransportUDP(String description)
+        internal TSIP_TransportUDP(String description)
             : this(TNET_Socket.TNET_SOCKET_HOST_ANY, TNET_Socket.TNET_SOCKET_PORT_ANY, description)
         {
 
         }
 
-        public TSIP_TransportUDP(Boolean useIPv6, String description)
+        internal TSIP_TransportUDP(Boolean useIPv6, String description)
             : this(TNET_Socket.TNET_SOCKET_HOST_ANY, TNET_Socket.TNET_SOCKET_PORT_ANY, useIPv6, description)
         {
 

@@ -23,9 +23,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Doubango.tinySIP
+namespace Doubango.tinySIP.Authentication
 {
-    public class TSip_Session
+    internal class TSIP_Challenge
     {
     }
 }

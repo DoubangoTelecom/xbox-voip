@@ -26,14 +26,14 @@ using tnet_socket_type_t = Doubango.tinyNET.TNET_Socket.tnet_socket_type_t;
 
 namespace Doubango.tinySIP.Transports
 {
-    public class TSIP_TransportTLS : TSIP_Transport
+    internal class TSIP_TransportTLS : TSIP_Transport
     {
-        public TSIP_TransportTLS(String host, ushort port, bool useIPv6, String description)
+        internal TSIP_TransportTLS(String host, ushort port, bool useIPv6, String description)
             : base(host, port, useIPv6 ? tnet_socket_type_t.tnet_socket_type_tls_ipv6 : tnet_socket_type_t.tnet_socket_type_tls_ipv4, description)
         {
 
         }
-        public TSIP_TransportTLS(String host, ushort port, String description)
+        internal TSIP_TransportTLS(String host, ushort port, String description)
             : this(host, port, false, description)
         {
 
