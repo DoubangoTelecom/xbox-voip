@@ -173,7 +173,7 @@ namespace Doubango.tinyNET
         {
             if (e.SocketError != SocketError.Success)
             {
-                // TODO: cleanup
+                // FIXME: cleanup
                 return;
             }
 
