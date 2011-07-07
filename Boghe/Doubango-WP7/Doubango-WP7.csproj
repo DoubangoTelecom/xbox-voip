@@ -73,6 +73,9 @@
     <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_RagelState.cs">
       <Link>tinySAK\TSK_RagelState.cs</Link>
     </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_StateMachine.cs">
+      <Link>tinySAK\TSK_StateMachine.cs</Link>
+    </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_String.cs">
       <Link>tinySAK\TSK_String.cs</Link>
     </Compile>
