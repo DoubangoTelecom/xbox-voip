@@ -48,17 +48,24 @@
     <Compile Include="Tests\SIP\Test_UriParser.cs" />
     <Compile Include="Tests\Utils\Test_FSM.cs" />
     <Compile Include="tinyHTTP\Headers\THTTP_Header.cs" />
+    <Compile Include="tinyHTTP\Headers\THTTP_HeaderAuthorization.cs" />
+    <Compile Include="tinyHTTP\Headers\THTTP_HeaderWWWAuthenticate.cs" />
+    <Compile Include="tinyHTTP\THTTP_Auth.cs" />
     <Compile Include="tinyNET\TNET_Socket.cs" />
     <Compile Include="tinyNET\TNET_Transport.cs" />
     <Compile Include="tinyNET\TNET_Utils.cs" />
+    <Compile Include="tinySAK\MD5.cs" />
+    <Compile Include="tinySAK\TSK_Base64.cs" />
     <Compile Include="tinySAK\TSK_Buffer.cs" />
     <Compile Include="tinySAK\TSK_Debug.cs" />
     <Compile Include="tinySAK\TSK_EventArgs.cs" />
     <Compile Include="tinySAK\TSK_EventHandlerTrigger.cs" />
+    <Compile Include="tinySAK\TSK_MD5.cs" />
     <Compile Include="tinySAK\TSK_Param.cs" />
     <Compile Include="tinySAK\TSK_RagelState.cs" />
     <Compile Include="tinySAK\TSK_StateMachine.cs" />
     <Compile Include="tinySAK\TSK_String.cs" />
+    <Compile Include="tinySAK\TSK_Time.cs" />
     <Compile Include="tinySIP\Authentication\TSIP_Challenge.cs" />
     <Compile Include="tinySIP\Dialogs\TSIP_Dialog.cs" />
     <Compile Include="tinySIP\Dialogs\TSIP_DialogInvite.cdiv.cs" />
@@ -90,6 +97,7 @@
     <Compile Include="tinySIP\Headers\TSIP_Header.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderAllow.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderAllowEvents.cs" />
+    <Compile Include="tinySIP\Headers\TSIP_HeaderAuthorization.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderCallId.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderContact.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderContentLength.cs" />
@@ -105,6 +113,7 @@
     <Compile Include="tinySIP\Headers\TSIP_HeaderSupported.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderTo.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderVia.cs" />
+    <Compile Include="tinySIP\Headers\TSIP_HeaderWWWAuthenticate.cs" />
     <Compile Include="tinySIP\Parsers\TSIP_ParserHeader.cs" />
     <Compile Include="tinySIP\Parsers\TSIP_ParserMessage.cs" />
     <Compile Include="tinySIP\Parsers\TSIP_ParserUri.cs" />
@@ -128,6 +137,10 @@
     <Compile Include="tinySIP\TSIP_Uri.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="tinyHTTP\Ragel\ragel.sh" />
+    <None Include="tinyHTTP\Ragel\ragel\thttp_machine_utils.rl" />
+    <None Include="tinyHTTP\Ragel\ragel\thttp_parser_header_Authorization.rl" />
+    <None Include="tinyHTTP\Ragel\ragel\thttp_parser_header_WWW_Authenticate.rl" />
     <None Include="tinySIP\Ragel\abnf\core.abnf" />
     <None Include="tinySIP\Ragel\ragel.sh" />
     <None Include="tinySIP\Ragel\ragel\tsip_machine_header.rl" />

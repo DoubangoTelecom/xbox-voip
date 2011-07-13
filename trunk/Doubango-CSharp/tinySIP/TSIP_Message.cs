@@ -258,6 +258,76 @@ namespace Doubango.tinySIP
             get{ return this.Type == tsip_message_type_t.Request; }
         }
 
+        public Boolean IsREGISTER
+        {
+            get { return  IsRequest && (this as TSIP_Request).RequestType == tsip_request_type_t.REGISTER; }
+        }
+
+        public Boolean IsSUBSCRIBE
+        {
+            get { return IsRequest && (this as TSIP_Request).RequestType == tsip_request_type_t.SUBSCRIBE; }
+        }
+
+        public Boolean IsPRACK
+        {
+            get { return IsRequest && (this as TSIP_Request).RequestType == tsip_request_type_t.PRACK; }
+        }
+
+        public Boolean IsINVITE
+        {
+            get { return IsRequest && (this as TSIP_Request).RequestType == tsip_request_type_t.INVITE; }
+        }
+
+        public Boolean IsBYE
+        {
+            get { return IsRequest && (this as TSIP_Request).RequestType == tsip_request_type_t.BYE; }
+        }
+
+        public Boolean IsACK
+        {
+            get { return IsRequest && (this as TSIP_Request).RequestType == tsip_request_type_t.ACK; }
+        }
+
+        public Boolean IsCANCEL
+        {
+            get { return IsRequest && (this as TSIP_Request).RequestType == tsip_request_type_t.CANCEL; }
+        }
+
+        public Boolean IsINFO
+        {
+            get { return IsRequest && (this as TSIP_Request).RequestType == tsip_request_type_t.INFO; }
+        }
+
+        public Boolean IsMESSAGE
+        {
+            get { return IsRequest && (this as TSIP_Request).RequestType == tsip_request_type_t.MESSAGE; }
+        }
+
+        public Boolean IsNOTIFY
+        {
+            get { return IsRequest && (this as TSIP_Request).RequestType == tsip_request_type_t.NOTIFY; }
+        }
+
+        public Boolean IsOPTIONS
+        {
+            get { return IsRequest && (this as TSIP_Request).RequestType == tsip_request_type_t.OPTIONS; }
+        }
+
+        public Boolean IsPUBLISH
+        {
+            get { return IsRequest && (this as TSIP_Request).RequestType == tsip_request_type_t.PUBLISH; }
+        }
+
+        public Boolean IsREFER
+        {
+            get { return IsRequest && (this as TSIP_Request).RequestType == tsip_request_type_t.REFER; }
+        }
+
+        public Boolean IsUPDATE
+        {
+            get { return IsRequest && (this as TSIP_Request).RequestType == tsip_request_type_t.UPDATE; }
+        }
+
         public Boolean IsResponse
         {
             get{ return this.Type == tsip_message_type_t.Response; }

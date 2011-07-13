@@ -41,7 +41,7 @@ namespace Doubango.tinyHTTP.Headers
 	        WWW_Authenticate,
         };
 
-        protected readonly thttp_header_type_t mType;
+        protected thttp_header_type_t mType;
         protected List<TSK_Param> mParams;
 
         public THTTP_Header(thttp_header_type_t type)

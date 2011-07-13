@@ -51,7 +51,11 @@ namespace Doubango.tinySAK
 
         public static String UnQuote(String str)
         {
-            return TSK_String.UnQuote(str, '"', '"');
+            if (str != null)
+            {
+                return TSK_String.UnQuote(str, '"', '"');
+            }
+            return null;
         }
     }
 }

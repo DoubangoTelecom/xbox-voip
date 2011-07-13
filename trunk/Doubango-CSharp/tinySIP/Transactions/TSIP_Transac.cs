@@ -22,18 +22,55 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Doubango.tinySIP.Dialogs;
+using Doubango.tinySAK;
 
 namespace Doubango.tinySIP.Transactions
 {
     internal abstract class TSIP_Transac : IDisposable, IEquatable<TSIP_Transac>
     {
+        internal enum tsip_transac_type_t
+        {
+	        ICT,
+	        IST,
+	        NICT,
+	        NIST,
+        };
+
+        internal enum tsip_transac_event_type_t
+        {
+	        IncomingMessage,
+	        OutgoingMessage,
+	        Canceled,
+	        Terminated,
+	        TimedOut,
+	        Error,
+	        TransportError
+        };
+
         private readonly Int64 mId;
+        private readonly tsip_transac_type_t mType;
+        private readonly Boolean mReliable;
+        private readonly Int32 mCSeqValue;
+        private readonly String mCSeqMethod;
+        private readonly String mCallId;
+        private readonly TSIP_Dialog mDialog;
+        private OnEvent mCallback;
+        private String mBranch;
 
         private static Int64 sUniqueId = 0;
 
-        internal TSIP_Transac()
+        internal delegate Boolean OnEvent(tsip_transac_event_type_t type, TSIP_Message message);
+
+        protected TSIP_Transac(tsip_transac_type_t type, Boolean reliable, Int32 cseq_value, String cseq_method, String callid, TSIP_Dialog dialog)
         {
             mId = sUniqueId++;
+            mType = type;
+            mReliable = reliable;
+            mCSeqValue = cseq_value;
+            mCSeqMethod = cseq_method;
+            mCallId = callid;
+            mDialog = dialog;
         }
 
         ~TSIP_Transac()
@@ -50,6 +87,72 @@ namespace Doubango.tinySIP.Transactions
             get { return mId; }
         }
 
+        internal tsip_transac_type_t Type
+        {
+            get { return mType; }
+        }
+
+        internal OnEvent Callback
+        {
+            get { return mCallback; }
+        }
+
+        internal Boolean Reliable
+        {
+            get { return mReliable; }
+        }
+
+        internal Int32 CSeqValue
+        {
+            get { return mCSeqValue; }
+        }
+
+        internal String CSeqMethod
+        {
+            get { return mCSeqMethod; }
+        }
+
+        internal String CallId
+        {
+            get { return mCallId; }
+        }
+
+        internal String Branch
+        {
+            get { return mBranch; }
+        }
+
+        protected abstract TSK_StateMachine StateMachine { get; }
+        internal abstract Boolean Start(TSIP_Request request);
+
+        internal Boolean Send(String branch, TSIP_Message message)
+        {
+            return mDialog.Stack.LayerTransport.SendMessage(branch, message);
+        }
+
+        internal static int Compare(TSIP_Transac t1, TSIP_Transac t2)
+        {
+            if (t1 != null && t2 != null)
+            {
+                if (String.Equals(t1.Branch, t2.Branch) &&
+                    String.Equals(t1.CSeqMethod, t2.CSeqMethod))
+                {
+                    return 0;
+                }
+            }
+            return -1;
+        }
+
+        internal Boolean SipEquals(TSIP_Transac other)
+        {
+            return this.CompareTo(other) == 0;
+        }
+
+        public int CompareTo(TSIP_Transac other)
+        {
+            return TSIP_Transac.Compare(this, other);
+        }
+       
         public bool Equals(TSIP_Transac other)
         {
             if (other != null)

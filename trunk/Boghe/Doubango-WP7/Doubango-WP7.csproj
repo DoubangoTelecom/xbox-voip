@@ -49,6 +49,18 @@
     <Reference Include="mscorlib.extensions" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Doubango-CSharp\tinyHTTP\Headers\THTTP_Header.cs">
+      <Link>tinyHTTP\Headers\THTTP_Header.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinyHTTP\Headers\THTTP_HeaderAuthorization.cs">
+      <Link>tinyHTTP\Headers\THTTP_HeaderAuthorization.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinyHTTP\Headers\THTTP_HeaderWWWAuthenticate.cs">
+      <Link>tinyHTTP\Headers\THTTP_HeaderWWWAuthenticate.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinyHTTP\THTTP_Auth.cs">
+      <Link>tinyHTTP\THTTP_Auth.cs</Link>
+    </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinyNET\TNET_Socket.cs">
       <Link>tinyNET\TNET_Socket.cs</Link>
     </Compile>
@@ -58,6 +70,12 @@
     <Compile Include="..\..\Doubango-CSharp\tinyNET\TNET_Utils.cs">
       <Link>tinyNET\TNET_Utils.cs</Link>
     </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySAK\MD5.cs">
+      <Link>tinySAK\MD5.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_Base64.cs">
+      <Link>tinySAK\TSK_Base64.cs</Link>
+    </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_Buffer.cs">
       <Link>tinySAK\TSK_Buffer.cs</Link>
     </Compile>
@@ -66,6 +84,9 @@
     </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_EventArgs.cs">
       <Link>tinySAK\TSK_EventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_MD5.cs">
+      <Link>tinySAK\TSK_MD5.cs</Link>
     </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_Param.cs">
       <Link>tinySAK\TSK_Param.cs</Link>
@@ -78,6 +99,9 @@
     </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_String.cs">
       <Link>tinySAK\TSK_String.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_Time.cs">
+      <Link>tinySAK\TSK_Time.cs</Link>
     </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySIP\Authentication\TSIP_Challenge.cs">
       <Link>tinySIP\Authentication\TSIP_Challenge.cs</Link>
@@ -172,6 +196,9 @@
     <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderAllowEvents.cs">
       <Link>tinySIP\Headers\TSIP_HeaderAllowEvents.cs</Link>
     </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderAuthorization.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderAuthorization.cs</Link>
+    </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderCallId.cs">
       <Link>tinySIP\Headers\TSIP_HeaderCallId.cs</Link>
     </Compile>
@@ -216,6 +243,9 @@
     </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderVia.cs">
       <Link>tinySIP\Headers\TSIP_HeaderVia.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderWWWAuthenticate.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderWWWAuthenticate.cs</Link>
     </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySIP\Parsers\TSIP_ParserHeader.cs">
       <Link>tinySIP\Parsers\TSIP_ParserHeader.cs</Link>

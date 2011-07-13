@@ -24,6 +24,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Doubango.tinyNET;
+using System.Collections.ObjectModel;
 
 namespace Doubango.tinySIP.Transports
 {
@@ -61,6 +62,11 @@ namespace Doubango.tinySIP.Transports
         internal Boolean IsRunning
         {
             get { return mRunning; }
+        }
+
+        internal ReadOnlyCollection<TSIP_Transport> Transports
+        {
+            get { return mTransports.AsReadOnly(); }
         }
 
         internal Boolean AddTransport(String localHost, ushort localPort, TNET_Socket.tnet_socket_type_t type, String description)

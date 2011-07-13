@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Doubango.tinySAK;
+using System.Collections.ObjectModel;
 
 namespace Doubango.tinySIP
 {
@@ -100,6 +101,16 @@ namespace Doubango.tinySIP
         {
             get { return mExpires; }
             set { mExpires = value; }
+        }
+
+        public ReadOnlyCollection<TSK_Param> Caps
+        {
+            get { return mCaps.AsReadOnly(); }
+        }
+
+        public ReadOnlyCollection<TSK_Param> Headers
+        {
+            get { return mHeaders.AsReadOnly(); }
         }
 
         public Boolean Reject(params Object[] parameters)
