@@ -41,9 +41,9 @@ namespace Doubango_CSharp
         {
             Test_FSM.DefaultTest();
 
-            TSIP_TransportUDP transportUdp = new TSIP_TransportUDP("192.168.0.13", TNET_Socket.TNET_SOCKET_PORT_ANY, false, "Sip Tansport using UDP");
-            IPEndPoint remoteEP = TNET_Socket.CreateEndPoint("192.168.0.10", 5060);
-            Int32 count = transportUdp.SendTo(remoteEP, Encoding.UTF8.GetBytes("test"));
+            //TSIP_TransportUDP transportUdp = new TSIP_TransportUDP("192.168.0.13", TNET_Socket.TNET_SOCKET_PORT_ANY, false, "Sip Tansport using UDP");
+            //IPEndPoint remoteEP = TNET_Socket.CreateEndPoint("192.168.0.10", 5060);
+           // Int32 count = transportUdp.SendTo(remoteEP, Encoding.UTF8.GetBytes("test"));
 
             //Test_UriParser.TestUriParser();
             Test_UriParser.TestMessageParser();

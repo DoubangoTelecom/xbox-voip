@@ -32,10 +32,36 @@ namespace Doubango.tinySIP.Transports
 {
     internal abstract class TSIP_Transport : TNET_Transport
     {
+        private readonly String mScheme;
+        private readonly String mProtocol;
+        private readonly String mViaProtocol;
+        private readonly String mService;
+
         protected TSIP_Transport(String host, ushort port, TNET_Socket.tnet_socket_type_t type, String description)
             :base(host, port, type, description)
         {
-            
+            mScheme = TNET_Socket.IsTLSType(type) ? "sips" : "sip";
+            if (TNET_Socket.IsStreamType(type))
+            {
+                mProtocol = "tcp";
+
+                if (TNET_Socket.IsTLSType(type))
+                {
+                    mViaProtocol = "TLS";
+                    mService = "SIPS+D2T";
+                }
+                else
+                {
+                    mViaProtocol = "TCP";
+                    mService = "SIP+D2T";
+                }
+            }
+            else
+            {
+                mProtocol = "udp";
+                mViaProtocol = "UDP";
+                mService = "SIP+D2U";
+            }
         }
 
         protected TSIP_Transport(TNET_Socket.tnet_socket_type_t type, String description)
@@ -52,6 +78,26 @@ namespace Doubango.tinySIP.Transports
         public override void Dispose()
         {
             
+        }
+
+        public String Scheme
+        {
+            get { return mScheme; }
+        }
+
+        public String Protocol
+        {
+            get { return mProtocol; }
+        }
+
+        public String ViaProtocol
+        {
+            get { return mViaProtocol; }
+        }
+
+        public String Service
+        {
+            get { return mService; }
         }
     }
 }

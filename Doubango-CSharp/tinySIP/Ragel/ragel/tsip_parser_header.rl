@@ -111,23 +111,14 @@
 	{
 		TSK_Debug.Warn("parse_header_Authentication_Info NOT IMPLEMENTED. Will be added as Dummy header");
         TSIP_HeaderDummy header = TSIP_HeaderDummy.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
-        if(header != null)
-        {
-            message.AddHeader(header);
-        }
+        message.AddHeader(header);
 	}
 
 	# /*== Authorization: ==*/
 	action parse_header_Authorization 
 	{
-		TSK_Debug.Warn("parse_header_Authorization NOT IMPLEMENTED. Will be added as Dummy header");
-        TSIP_HeaderDummy header = TSIP_HeaderDummy.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
-        if(header != null)
-        {
-            message.AddHeader(header);
-        }
-		//tsip_header_Authorization_t *header = tsip_header_Authorization_parse(state->tag_start, (state->tag_end-state->tag_start));
-		//ADD_HEADER(header);
+		TSIP_HeaderAuthorization header = TSIP_HeaderAuthorization.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
+        message.AddHeader(header);
 	}
 
 	# /*== Call-ID: ==*/
@@ -903,11 +894,8 @@
 	# /*== WWW-Authenticate: ==*/
 	action parse_header_WWW_Authenticate
 	{
-		TSK_Debug.Warn("parse_header_WWW_Authenticate NOT IMPLEMENTED. Will be added as Dummy header");
-        TSIP_HeaderDummy header = TSIP_HeaderDummy.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
+		TSIP_HeaderWWWAuthenticate header = TSIP_HeaderWWWAuthenticate.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
         message.AddHeader(header);
-		//tsip_header_WWW_Authenticate_t *header = tsip_header_WWW_Authenticate_parse(state->tag_start, (state->tag_end-state->tag_start));
-		//ADD_HEADER(header);
 	}
 		
 	# /*== extension_header: ==*/

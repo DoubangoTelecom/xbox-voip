@@ -40,16 +40,18 @@ namespace Doubango.tinySIP
         private String mPrivateIdentity;
         private String mPassword;
 
+        private Boolean mEarlyIMS;
         private TSIP_Uri mRealm;
         private String mLocalIP;
         private ushort mLocalPort;
         private String mProxyHost;
+        private ushort mProxyPort;
         private TNET_Socket.tnet_socket_type_t mProxyType;
 
         private String mAoRIP;
         private ushort mAoRPort;
 
-        private readonly List<TSIP_Header> mHeaders;
+        private readonly List<TSK_Param> mHeaders;
 
         private readonly IDictionary<Int64,TSip_Session> mSipSessions;
         private readonly TSIP_DialogLayer mLayerDialog;
@@ -64,7 +66,7 @@ namespace Doubango.tinySIP
         public TSIP_Stack(TSIP_Uri domainName, String privateIdentity, TSIP_Uri publicIdentity, String proxyHost, ushort proxyPort)
         {
             mSipSessions = new Dictionary<Int64, TSip_Session>();
-            mHeaders = new List<TSIP_Header>();
+            mHeaders = new List<TSK_Param>();
 
             if (domainName == null || String.IsNullOrEmpty(privateIdentity) || publicIdentity == null)
             {
@@ -77,7 +79,7 @@ namespace Doubango.tinySIP
             mPublicIdentity = publicIdentity;
             mPreferredIdentity = mPublicIdentity;
             mProxyHost = String.IsNullOrEmpty(proxyHost) ? domainName.Host : proxyHost;
-            mLocalPort = proxyPort == 0 ? (ushort)5060 : proxyPort;
+            mProxyPort = proxyPort == 0 ? (ushort)5060 : proxyPort;
 
             /* === Default values === */
             mLocalIP = TNET_Socket.TNET_SOCKET_HOST_ANY;
@@ -126,6 +128,31 @@ namespace Doubango.tinySIP
             get { return mRealm; }
         }
 
+        internal String PrivateIdentity
+        {
+            get { return mPrivateIdentity; }
+        }
+
+        internal TSIP_Uri PreferredIdentity
+        {
+            get { return mPreferredIdentity; }
+        }
+
+        internal String Password
+        {
+            get { return mPassword; }
+        }
+
+        internal Boolean EarlyIMS
+        {
+            get { return mEarlyIMS; }
+        }
+
+        public List<TSK_Param> Headers
+        {
+            get {  return mHeaders; }
+        }
+
         internal TNET_Socket.tnet_socket_type_t ProxyType
         {
             get { return mProxyType; }
@@ -134,6 +161,16 @@ namespace Doubango.tinySIP
         internal TSIP_DialogLayer LayerDialog
         {
             get { return mLayerDialog; }
+        }
+
+        internal TSIP_TransacLayer LayerTransac
+        {
+            get { return mLayerTransac; }
+        }
+
+        internal TSIP_TransportLayer LayerTransport
+        {
+            get { return mLayerTransport; }
         }
 
         internal void AddSession(TSip_Session session)
@@ -248,6 +285,31 @@ bail:
             {
                 OnStackEvent.BeginInvoke(@event, AsyncCallbackForDelegate, null);
             }
+        }
+
+        internal TSIP_Uri GetProxyCSCFUri(Boolean lr)
+        {
+            TSIP_Uri uri = null;
+            if (mLayerTransport != null && mLayerTransport.Transports.Count > 0)
+            {
+                TSIP_Transport transport = mLayerTransport.Transports[0];
+                if (transport != null)
+                {
+                    Boolean ipv6 = TNET_Socket.IsIPv6Type(transport.Type);
+                    Boolean quote_ip = (ipv6 && !String.IsNullOrEmpty(mProxyHost) && mProxyHost.Contains(":"))/* IPv6 IP string?*/;
+                    String uriString = String.Format("{0}:{1}{2}{2}:{3};{4};transport={5}",
+                            transport.Scheme,
+                            quote_ip ? "[" : "",
+                            mProxyHost,
+                            quote_ip ? "]" : "",
+                            mProxyPort,
+                            lr ? "lr" : "",
+                            transport.Protocol
+                        );
+                    uri = TSIP_ParserUri.Parse(uriString);
+                }
+            }
+            return uri;
         }
     }
 }

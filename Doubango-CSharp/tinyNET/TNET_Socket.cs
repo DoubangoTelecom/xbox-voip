@@ -232,7 +232,7 @@ namespace Doubango.tinyNET
 
         public Boolean IsTLS
         {
-            get { return (((int)this.Type & TNET_SOCKET_TYPE_TLS) == TNET_SOCKET_TYPE_TLS); }
+            get { return TNET_Socket.IsTLSType(this.Type); }
         }
 
         public Boolean IsSCTP
@@ -283,6 +283,11 @@ namespace Doubango.tinyNET
         public static Boolean IsDatagramType(tnet_socket_type_t type)
         {
             return (((int)type & TNET_SOCKET_TYPE_UDP) == TNET_SOCKET_TYPE_UDP);
+        }
+
+        public static Boolean IsTLSType(tnet_socket_type_t type)
+        {
+            return (((int)type & TNET_SOCKET_TYPE_TLS) == TNET_SOCKET_TYPE_TLS);
         }
 
         public static IPEndPoint CreateEndPoint(String host, ushort port)
