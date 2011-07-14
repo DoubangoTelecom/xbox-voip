@@ -158,6 +158,11 @@ namespace Doubango.tinySIP
             return TSIP_Uri.Clone(this, true, true);
         }
 
+        public TSIP_Uri Clone(Boolean with_params, Boolean with_quote)
+        {
+            return TSIP_Uri.Clone(this, with_params, with_quote);
+        }
+
         public static TSIP_Uri Create(tsip_uri_type_t type)
         {
             return new TSIP_Uri(type);

@@ -62,6 +62,11 @@ namespace Doubango.tinySIP
             mType = type;
         }
 
+        public tsip_event_type_t Type
+        {
+            get { return mType; }
+        }
+
         public TSip_Session SipSession
         {
             get { return mSipSession; }

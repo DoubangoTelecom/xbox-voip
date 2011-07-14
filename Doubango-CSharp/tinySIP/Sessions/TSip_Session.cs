@@ -24,6 +24,7 @@ using System.Linq;
 using System.Text;
 using Doubango.tinySAK;
 using System.Collections.ObjectModel;
+using Doubango.tinySIP.Headers;
 
 namespace Doubango.tinySIP
 {
@@ -43,11 +44,11 @@ namespace Doubango.tinySIP
         private static Int64 sUniqueId = 0;
 
 #if DEBUG || _DEBUG
-        internal const Int64 DEFAULT_EXPIRES = 3600000; /* miliseconds. */
+        internal const Int64 DEFAULT_EXPIRES = 10000;//3600000; /* miliseconds. */
 #else
         internal const Int64 DEFAULT_EXPIRES = 600000000;
 #endif
-        internal TSip_Session(TSIP_Stack stack)
+        protected TSip_Session(TSIP_Stack stack)
         {
             mId = sUniqueId++;
             mStack = stack;
@@ -55,9 +56,34 @@ namespace Doubango.tinySIP
             mHeaders = new List<TSK_Param>();
             mExpires = TSip_Session.DEFAULT_EXPIRES;
 
+            /* From */
+            mUriFrom = mStack.PublicIdentity;
+
+            /* to */
+            /* To value will be set by the dialog (whether to use as Request-URI). */
+
             if (mStack != null)
             {
                 mStack.AddSession(this);
+            }
+        }
+
+        // internal construction used to create server-side session
+        protected TSip_Session(TSIP_Stack stack, TSIP_Message message)
+            :this(stack)
+        {
+            if (message != null)
+            {
+                /* From: */
+                if (message.From != null && message.From.Uri != null)
+                { /* MUST be not null */
+                    mUriFrom = message.From.Uri;
+                }
+                /* To: */
+                if (message.To != null && message.To.Uri != null)
+                { /* MUST be not null */
+                    mUriTo = message.To.Uri;
+                }
             }
         }
 
@@ -101,6 +127,12 @@ namespace Doubango.tinySIP
         {
             get { return mExpires; }
             set { mExpires = value; }
+        }
+
+        public Boolean SilentHangUp
+        {
+            get { return mSilentHangUp; }
+            set { mSilentHangUp = value; }
         }
 
         public ReadOnlyCollection<TSK_Param> Caps

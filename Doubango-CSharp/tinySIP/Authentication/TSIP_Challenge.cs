@@ -53,6 +53,11 @@ namespace Doubango.tinySIP.Authentication
         {
         }
 
+        internal String Realm
+        {
+            get { return mRealm; }
+        }
+
         internal String GetResponse(String method, String uristring, byte[] entity_body)
         {
             String response = String.Empty;
@@ -146,7 +151,7 @@ namespace Doubango.tinySIP.Authentication
             return null;
         }
 
-        internal void Update(String scheme, String realm, String nonce, String opaque, String algorithm, String qop)
+        internal Boolean Update(String scheme, String realm, String nonce, String opaque, String algorithm, String qop)
         {
             Boolean nonceHasChanged = String.Equals(mNonce, nonce, StringComparison.InvariantCultureIgnoreCase);
 
@@ -164,6 +169,8 @@ namespace Doubango.tinySIP.Authentication
             {
                 ResetCNonce();
             }
+
+            return true;
         }
 
         internal static TSIP_Header CreateEmptyAuthorization(String username, String realm, String uristring)

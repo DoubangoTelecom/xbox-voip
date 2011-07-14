@@ -39,7 +39,7 @@ namespace Doubango.tinyNET
         private Boolean mStarted;
         private readonly IDictionary<Int64, TNET_Socket> mSockets;
 
-        public event EventHandler<TransportEventArgs> NetworkEvent;
+        internal event EventHandler<TransportEventArgs> NetworkEvent;
 
         public TNET_Transport(String host, ushort port, TNET_Socket.tnet_socket_type_t type, String description)
         {
@@ -53,6 +53,7 @@ namespace Doubango.tinyNET
             mMasterSocket = new TNET_Socket(host, port, type);
             if (mMasterSocket != null)
             {
+                mMasterSocket.RecvSocketCompleted += this.SocketAsyncEventArgs_Callback;
                 mSockets.Add(mMasterSocket.Id, mMasterSocket);
             }
         }
@@ -132,12 +133,12 @@ namespace Doubango.tinyNET
                 return IntPtr.Zero;
             }
 
-            IPEndPoint endpoint = TNET_Socket.CreateEndPoint(host, port);
+            EndPoint endpoint = TNET_Socket.CreateEndPoint(host, port);
             if (endpoint != null)
             {
-                var args = new SocketAsyncEventArgs();
-                args.RemoteEndPoint = endpoint;
-                args.Completed += this.SocketAsyncEventArgs_Callback;
+                //var args = new SocketAsyncEventArgs();
+                //args.RemoteEndPoint = endpoint;
+                //args.Completed += this.SocketAsyncEventArgs_Callback;
                 // args.SetBuffer(buffer, 0, buffer.Length);
 
                 return IntPtr.Zero;
@@ -147,13 +148,13 @@ namespace Doubango.tinyNET
         }
 
 
-        public Int32 SendTo(Int64 localSocket, IPEndPoint remoteEP, byte[] buffer)
+        public Int32 SendTo(Int64 localSocket, EndPoint remoteEP, byte[] buffer)
         {
             if (mSockets.ContainsKey(localSocket))
             {
                 TNET_Socket socketFrom = mSockets[localSocket];
                 if (socketFrom != null)
-                {
+                {                    
                     return socketFrom.SendTo(remoteEP, buffer);
                 }
             }
@@ -164,9 +165,24 @@ namespace Doubango.tinyNET
             return -1;
         }
 
-        public Int32 SendTo(IPEndPoint remoteEP, byte[] buffer)
+        protected Int32 SendTo(EndPoint remoteEP, byte[] buffer)
         {
             return this.SendTo(mMasterSocket.Id, remoteEP, buffer);
+        }
+
+        public Boolean GetLocalIpAndPort(Int64 socketId, out String ip, out ushort port)
+        {
+            if (mSockets.ContainsKey(socketId))
+            {
+                TNET_Socket socket = mSockets[socketId];
+                return socket.GetLocalIpAndPort(out ip, out port);
+            }
+            return mMasterSocket.GetLocalIpAndPort(out ip, out port);
+        }
+
+        public Boolean GetLocalIpAndPort(out String ip, out ushort port)
+        {
+            return GetLocalIpAndPort(mMasterSocket.Id, out ip, out port);
         }
 
         private void SocketAsyncEventArgs_Callback(object sender, SocketAsyncEventArgs e)
@@ -177,10 +193,29 @@ namespace Doubango.tinyNET
                 return;
             }
 
+            if (NetworkEvent == null)
+            {
+                return;
+            }
+
             switch (e.LastOperation)
             {
                 case SocketAsyncOperation.Receive:
                 case SocketAsyncOperation.ReceiveFrom:
+                    {
+                        TNET_Socket tskSocket = (e.UserToken as TNET_Socket);
+                        
+                        if (e.Buffer != null)
+                        {
+                            byte[] bytes = new byte[e.BytesTransferred];
+                            Buffer.BlockCopy(e.Buffer, 0, bytes, 0, bytes.Length);
+                            TransportEventArgs eargs = new TransportEventArgs(TransportEventArgs.TransportEventTypes.Data, bytes, this, tskSocket.Id);
+                            NetworkEvent(this, eargs);
+                        }
+                        // enqueue another event args
+                        tskSocket.ScheduleReceiveFromAsync();
+                        break;
+                    }
                 case SocketAsyncOperation.SendTo:
                 default:
                     {
@@ -206,14 +241,14 @@ namespace Doubango.tinyNET
             private readonly TransportEventTypes mType;
             private readonly byte[] mData;
             private readonly Object mContext;
-            private IntPtr mLocalSocketHandle;
+            private readonly Int64 mLocalSocketId;
 
-            public TransportEventArgs(TransportEventTypes type, byte[] data, Object context, IntPtr localSocketHandle)
+            public TransportEventArgs(TransportEventTypes type, byte[] data, Object context, Int64 localSocketId)
             {
                 mType = type;
                 mData = data;
                 mContext = context;
-                mLocalSocketHandle = localSocketHandle;
+                mLocalSocketId = localSocketId;
             }
 
             public TransportEventTypes Type
@@ -221,19 +256,19 @@ namespace Doubango.tinyNET
                 get { return mType; }
             }
 
-            private byte[] Data
+            public byte[] Data
             {
                 get { return mData; }
             }
 
-            private Object Context
+            public Object Context
             {
                 get { return mContext; }
             }
 
-            private IntPtr LocalSocketHandle
+            public Int64 LocalSocketId
             {
-                get { return mLocalSocketHandle; }
+                get { return mLocalSocketId; }
             }
 
 

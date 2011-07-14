@@ -22,13 +22,42 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
-namespace Doubango.tinySIP.Dialogs
+namespace Doubango.tinySAK
 {
-    internal partial class TSIP_DialogRegister
+    public class TSK_Timer
     {
-        private void InitServerFSM()
+        private UInt64 mPeriod;
+        private readonly Boolean mRepeat;
+        private readonly Timer mTimer;
+
+        public TSK_Timer(UInt64 period, Boolean repeat, TimerCallback callback)
         {
+            mPeriod = period;
+            mRepeat = repeat;
+
+            mTimer = new Timer(callback, this, Timeout.Infinite, Timeout.Infinite);
+        }
+        public TSK_Timer(UInt64 period, TimerCallback callback)
+            :this(period, false, callback)
+        {
+        }
+
+        public UInt64 Period
+        {
+            get { return mPeriod; }
+            set { mPeriod = value; }
+        }
+
+        public Boolean Start()
+        {
+            return mTimer.Change((long)this.Period, mRepeat ? (long)this.Period : Timeout.Infinite); 
+        }
+
+        public Boolean Stop()
+        {
+            return mTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
     }
 }

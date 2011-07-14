@@ -37,6 +37,11 @@ namespace Doubango.tinySAK
             mValue = value;
         }
 
+        public TSK_Param(String name)
+            :this(name, null)
+        {
+        }
+
         public String Name
         {
             get { return mName; }
@@ -101,6 +106,16 @@ namespace Doubango.tinySAK
                 return @params.FirstOrDefault(
                     (x) => { return x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase); }
                 );
+            }
+            return null;
+        }
+
+        public static String GetValueByName(List<TSK_Param> @params, String name)
+        {
+            TSK_Param param = GetByName(@params, name);
+            if (param != null)
+            {
+                return param.Value;
             }
             return null;
         }

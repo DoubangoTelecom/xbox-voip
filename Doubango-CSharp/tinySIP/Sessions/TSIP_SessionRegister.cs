@@ -30,8 +30,15 @@ namespace Doubango.tinySIP.Sessions
     public class TSIP_SessionRegister : TSip_Session
     {
         public TSIP_SessionRegister(TSIP_Stack stack)
-            :base(stack)
+            :this(stack,  null)
         {
+        }
+
+        // internal construction used to create server-side session
+        internal TSIP_SessionRegister(TSIP_Stack stack, TSIP_Message message)
+            :base(stack, message)
+        {
+            
         }
 
         public Boolean Register(TSIP_Action.TSIP_ActionConfig actionConfig)
@@ -64,6 +71,11 @@ namespace Doubango.tinySIP.Sessions
             }
 
             return dialog.ExecuteAction((Int32)action.Type, null, action);
+        }
+
+        public Boolean Register()
+        {
+            return Register(null);
         }
 
         public Boolean UnRegister(params Object[] parameters)

@@ -89,7 +89,7 @@ namespace Doubango.tinySIP.Headers
 		}
 
 		public TSIP_HeaderTo(String displayName, TSIP_Uri uri, String tag)
-			: base(tsip_header_type_t.From)
+			: base(tsip_header_type_t.To)
 		{
 			this.DisplayName = displayName;
 			this.Uri = uri;

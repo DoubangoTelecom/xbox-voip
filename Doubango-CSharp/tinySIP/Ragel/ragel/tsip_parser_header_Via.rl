@@ -55,7 +55,7 @@
 	}
 
 	action parse_port{
-		curr_via.Port = TSK_RagelState.Parser.GetInt16(data, p, tag_start);
+		curr_via.Port = (UInt16)TSK_RagelState.Parser.GetUInt32(data, p, tag_start);
 	}
 
 	action parse_transport{
@@ -140,7 +140,7 @@ namespace Doubango.tinySIP.Headers
 	{
 		private String mBranch;
 		private String mHost;
-		private Int16 mPort;
+		private UInt16 mPort;
 		private String mComp;
 		private String mSigcompId;
 		private String mReceived;
@@ -152,12 +152,15 @@ namespace Doubango.tinySIP.Headers
 		private Int32 mRPort;
 		private Int32 mTTL;
 
+		internal const String PROTO_NAME_DEFAULT = "SIP";
+        internal const String PROTO_VERSION_DEFAULT = "2.0";
+
         public TSIP_HeaderVia()
-            :this(null,null,null,null,-1)
+            :this(null,null,null,null,0)
         {
         }
 
-		public TSIP_HeaderVia(String protoName, String protoVersion, String transport, String host, Int16 port)
+		public TSIP_HeaderVia(String protoName, String protoVersion, String transport, String host, UInt16 port)
 			: base(tsip_header_type_t.Via)
 		{
 			this.ProtoName = protoName;
@@ -227,7 +230,7 @@ namespace Doubango.tinySIP.Headers
 			set{ mHost = value; }
 		}
 
-		public Int16 Port
+		public UInt16 Port
 		{
 			get{ return mPort; }
 			set{ mPort = value; }

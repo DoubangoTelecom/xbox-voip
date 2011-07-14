@@ -140,7 +140,7 @@ ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderRoute.cs ./ragel/tsip_parser_header_
 #ragel.exe $OPTIONS -o ./src/headers/tsip_header_Session_Expires.c ./ragel/tsip_parser_header_Session_Expires.rl
 
 # ==Subscription-State
-#ragel.exe $OPTIONS -o ./src/headers/tsip_header_Subscription_State.c ./ragel/tsip_parser_header_Subscription_State.rl
+ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderSubscriptionState.cs ./ragel/tsip_parser_header_Subscription_State.rl
 
 # ==Supported
 ragel.exe $OPTIONS -o ../Headers/TSIP_HeaderSupported.cs ./ragel/tsip_parser_header_Supported.rl

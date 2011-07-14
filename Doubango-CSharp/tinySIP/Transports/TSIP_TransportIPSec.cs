@@ -28,13 +28,13 @@ namespace Doubango.tinySIP.Transports
 {
     internal class TSIP_TransportIPSec : TSIP_Transport
     {
-        internal TSIP_TransportIPSec(String host, ushort port, bool useIPv6, String description)
-            : base(host, port, useIPv6 ? tnet_socket_type_t.tnet_socket_type_udp_ipsec_ipv6 : tnet_socket_type_t.tnet_socket_type_udp_ipsec_ipv4, description)
+        internal TSIP_TransportIPSec(TSIP_Stack stack, String host, ushort port, bool useIPv6, String description)
+            : base(stack,host, port, useIPv6 ? tnet_socket_type_t.tnet_socket_type_udp_ipsec_ipv6 : tnet_socket_type_t.tnet_socket_type_udp_ipsec_ipv4, description)
         {
 
         }
-        internal TSIP_TransportIPSec(String host, ushort port, String description)
-            : this(host, port, false, description)
+        internal TSIP_TransportIPSec(TSIP_Stack stack, String host, ushort port, String description)
+            : this(stack,host, port, false, description)
         {
 
         }
