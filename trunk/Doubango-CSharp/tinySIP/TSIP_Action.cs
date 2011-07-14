@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Doubango.tinySAK;
 
 namespace Doubango.tinySIP
 {
@@ -80,9 +81,12 @@ namespace Doubango.tinySIP
         };
 
         private readonly tsip_action_type_t mType;
+        private readonly List<TSK_Param> mHeaders;
+        private byte[] mPayload;
 
         internal TSIP_Action(tsip_action_type_t type, params Object[] parameters)
         {
+            mHeaders = new List<TSK_Param>();
             mType = type;
         }
 
@@ -99,7 +103,16 @@ namespace Doubango.tinySIP
             get { return mType; }
         }
 
+        public List<TSK_Param> Headers
+        {
+            get { return mHeaders; }
+        }
 
+        public byte[] Payload
+        {
+            get { return mPayload; }
+            set { mPayload = value; }
+        }
 
         /// <summary>
         /// TSIP_ActionConfig

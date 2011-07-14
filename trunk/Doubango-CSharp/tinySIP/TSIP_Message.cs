@@ -438,10 +438,9 @@ namespace Doubango.tinySIP
 
         public Boolean AddHeaders(TSIP_Header[] headers)
         {
-            if (headers == null)
+            if (headers == null) // not error
             {
-                TSK_Debug.Error("Invalid paramerer");
-                return false;
+                return true;
             }
 
             foreach(TSIP_Header header in headers)
@@ -813,7 +812,7 @@ namespace Doubango.tinySIP
             this.AddHeaders(new TSIP_Header[]
                 {
                     toUri == null ? null : new TSIP_HeaderTo(toUri.DisplayName, toUri, null),
-                    fromUri == null ? null : new TSIP_HeaderFrom(fromUri.DisplayName, toUri, null),
+                    fromUri == null ? null : new TSIP_HeaderFrom(fromUri.DisplayName, fromUri, null),
                     /* Via will be added by the transport layer */
                     new TSIP_HeaderCSeq((uint)cseq, method),
                     String.IsNullOrEmpty(callId) ? null : new TSIP_HeaderCallId(callId),
@@ -935,6 +934,56 @@ namespace Doubango.tinySIP
         {
             get { return mReasonPhrase; }
             set { mReasonPhrase = value; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="code">1,2,3,...</param>
+        /// <returns></returns>
+        private Boolean IsXXX(ushort code)
+        {
+            return code * 100 <= this.StatusCode && this.StatusCode <= ((code * 100) + 99);
+        }
+
+        public Boolean Is1xx
+        {
+            get { return this.IsXXX(1); }
+        }
+
+        public Boolean Is2xx
+        {
+            get { return this.IsXXX(2); }
+        }
+
+        public Boolean Is3xx
+        {
+            get { return this.IsXXX(3); }
+        }
+
+        public Boolean Is4xx
+        {
+            get { return this.IsXXX(4); }
+        }
+
+        public Boolean Is5xx
+        {
+            get { return this.IsXXX(5); }
+        }
+
+        public Boolean Is6xx
+        {
+            get { return this.IsXXX(6); }
+        }
+
+        public Boolean Is23456
+        {
+            get { return 200 <= this.StatusCode && this.StatusCode <= 699; }
+        }
+
+        public Boolean Is3456
+        {
+            get { return 300 <= this.StatusCode && this.StatusCode <= 699; }
         }
     }
 

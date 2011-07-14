@@ -1,5 +1,5 @@
-/*
-* Copyright (C) 2010-2011 Mamadou Diop.
+/* Copyright (C) 2010-2011 Mamadou Diop. 
+* Copyright (C) 2011 Doubango Telecom <http://www.doubango.org>
 *
 * Contact: Mamadou Diop <diopmamadou(at)doubango.org>
 *	
@@ -17,24 +17,7 @@
 *	
 * You should have received a copy of the GNU General Public License
 * along with XBox-Voip.
-*
 */
-
-/**@file tsip_header_Subscription_State.c
- * @brief SIP Subscription_State header.
- *
- * @author Mamadou Diop <diopmamadou(at)doubango.org>
- *
-
- */
-#include "tinysip/headers/tsip_header_Subscription_State.h"
-
-#include "tinysip/parsers/tsip_parser_uri.h"
-
-#include "tsk_debug.h"
-#include "tsk_memory.h"
-
-
 
 /***********************************
 *	Ragel state machine.
@@ -50,23 +33,23 @@
 	}
 
 	action parse_state{
-		TSK_PARSER_SET_STRING(hdr_Subscription_State->state);
+		hdr_Subscription_State.State = TSK_RagelState.Parser.GetString(data, p, tag_start);
 	}
 
 	action parse_reason{
-		TSK_PARSER_SET_STRING(hdr_Subscription_State->reason);
+		hdr_Subscription_State.Reason = TSK_RagelState.Parser.GetString(data, p, tag_start);
 	}
 
 	action parse_expires{
-		TSK_PARSER_SET_INTEGER(hdr_Subscription_State->expires);
+		hdr_Subscription_State.Expires = TSK_RagelState.Parser.GetInt32(data, p, tag_start);
 	}
 
 	action parse_retry_after{
-		TSK_PARSER_SET_INTEGER(hdr_Subscription_State->retry_after);
+		hdr_Subscription_State.RetryAfter = TSK_RagelState.Parser.GetInt32(data, p, tag_start);
 	}
 
 	action parse_param{
-		TSK_PARSER_ADD_PARAM(TSIP_HEADER_PARAMS(hdr_Subscription_State));
+		hdr_Subscription_State.Params = TSK_RagelState.Parser.AddParam(data, p, tag_start, hdr_Subscription_State.Params);
 	}
 
 	action eob{
@@ -80,106 +63,100 @@
 
 }%%
 
-tsip_header_Subscription_State_t* tsip_header_Subscription_State_create()
+using System;
+using Doubango.tinySAK;
+using System.Collections.Generic;
+
+namespace Doubango.tinySIP.Headers
 {
-	return tsk_object_new(tsip_header_Subscription_State_def_t);
-}
+    public class TSIP_HeaderSubscriptionState : TSIP_Header
+	{
+		private String mState;
+		private String mReason;
+		private Int32 mExpires;
+		private Int32 mRetryAfter;
+
+		public TSIP_HeaderSubscriptionState()
+            : base(tsip_header_type_t.Subscription_State)
+        {
+            mExpires = -1;
+			mRetryAfter = -1;
+        }
 
 
-int tsip_header_Subscription_State_serialize(const tsip_header_t* header, tsk_buffer_t* output)
-{
-	if(header){
-		const tsip_header_Subscription_State_t *Subscription_State = (const tsip_header_Subscription_State_t *)header;
-		int ret;
-		
-		ret = tsk_buffer_append_2(output, "%s%s%s", 
-			Subscription_State->state,
+		public String State
+        {
+            get { return mState; }
+            set{ mState = value; }
+        }
+
+		public String Reason
+        {
+            get { return mReason; }
+            set{ mReason = value; }
+        }
+
+		public Int32 Expires
+        {
+            get { return mExpires; }
+            set{ mExpires = value; }
+        }
+
+		public Int32 RetryAfter 
+        {
+            get { return mRetryAfter; }
+            set{ mRetryAfter = value; }
+        }
+
+		public override String Value
+        {
+            get 
+            {                 
+                String ret = String.Format("{0}{1}{1}", 
+			        this.State,
+        			
+                    !String.IsNullOrEmpty(this.Reason) ? ";reason=" : String.Empty,
+			        !String.IsNullOrEmpty(this.Reason) ? this.Reason : String.Empty				
+			        );
+
+		        if(this.Expires >= 0)
+                {
+                    ret+= String.Format(";expires={0}", this.Expires);
+		        }
+		        if(this.RetryAfter >= 0)
+                {
+                    ret+= String.Format(";retry-after={0}", this.RetryAfter);
+		        }
+                return ret; 
+            }
+            set
+            {
+                TSK_Debug.Error("Not implemented");
+            }
+        }
+
+		%%write data;
+
+		public static TSIP_HeaderSubscriptionState Parse(String data)
+		{
+			int cs = 0;
+			int p = 0;
+			int pe = data.Length;
+			int eof = pe;
+			TSIP_HeaderSubscriptionState hdr_Subscription_State = new TSIP_HeaderSubscriptionState();
 			
-			Subscription_State->reason ? ";reason=" : "",
-			Subscription_State->reason ? Subscription_State->reason : ""				
-			);
-		if(!ret && Subscription_State->expires>=0){
-			ret = tsk_buffer_append_2(output, ";expires=%d", Subscription_State->expires);
+			int tag_start = 0;
+			
+			%%write init;
+			%%write exec;
+			
+			if( cs < %%{ write first_final; }%% ){
+				TSK_Debug.Error("Failed to parse SIP 'Subscription-State' header.");
+				hdr_Subscription_State.Dispose();
+				hdr_Subscription_State = null;
+			}
+			
+			return hdr_Subscription_State;
 		}
-		if(!ret && Subscription_State->retry_after>=0){
-			ret = tsk_buffer_append_2(output, ";retry-after=%d", Subscription_State->retry_after);
-		}
-
-		return ret;
 	}
-
-	return -1;
 }
-
-tsip_header_Subscription_State_t *tsip_header_Subscription_State_parse(const char *data, tsk_size_t size)
-{
-	int cs = 0;
-	const char *p = data;
-	const char *pe = p + size;
-	const char *eof = pe;
-	tsip_header_Subscription_State_t *hdr_Subscription_State = tsip_header_Subscription_State_create();
-	
-	const char *tag_start;
-
-	%%write data;
-	%%write init;
-	%%write exec;
-	
-	if( cs < %%{ write first_final; }%% ){
-		TSK_DEBUG_ERROR("Failed to parse 'Subscription-State' header.");
-		TSK_OBJECT_SAFE_FREE(hdr_Subscription_State);
-	}
-	
-	return hdr_Subscription_State;
-}
-
-
-
-
-
-
-
-//========================================================
-//	Subscription_State header object definition
-//
-
-static tsk_object_t* tsip_header_Subscription_State_ctor(tsk_object_t *self, va_list * app)
-{
-	tsip_header_Subscription_State_t *Subscription_State = self;
-	if(Subscription_State){
-		TSIP_HEADER(Subscription_State)->type = tsip_htype_Subscription_State;
-		TSIP_HEADER(Subscription_State)->serialize = tsip_header_Subscription_State_serialize;
-
-		Subscription_State->expires = -1;
-		Subscription_State->retry_after = -1;
-	}
-	else{
-		TSK_DEBUG_ERROR("Failed to create new Subscription_State header.");
-	}
-	return self;
-}
-
-static tsk_object_t* tsip_header_Subscription_State_dtor(tsk_object_t *self)
-{
-	tsip_header_Subscription_State_t *Subscription_State = self;
-	if(Subscription_State){
-		TSK_FREE(Subscription_State->state);
-		TSK_FREE(Subscription_State->reason);
-
-		TSK_OBJECT_SAFE_FREE(TSIP_HEADER_PARAMS(Subscription_State));
-	}
-	else{
-		TSK_DEBUG_ERROR("Null Subscription_State header.");
-	}
-
-	return self;
-}
-
-static const tsk_object_def_t tsip_header_Subscription_State_def_s = 
-{
-	sizeof(tsip_header_Subscription_State_t),
-	tsip_header_Subscription_State_ctor,
-	tsip_header_Subscription_State_dtor,
-	tsk_null
-};
-const tsk_object_def_t *tsip_header_Subscription_State_def_t = &tsip_header_Subscription_State_def_s;

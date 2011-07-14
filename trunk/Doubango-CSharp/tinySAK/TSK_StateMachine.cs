@@ -58,7 +58,7 @@ namespace Doubango.tinySAK
             mUserData = userData;
             mEntries = new List<Entry>();
 #if WINDOWS_PHONE
-            mMutex = new Mutex(false, null); // unnamed mutex
+            mMutex = new Mutex(false, TSK_String.Random()); // unnamed mutex
 #else
             mMutex = new Mutex();
 #endif

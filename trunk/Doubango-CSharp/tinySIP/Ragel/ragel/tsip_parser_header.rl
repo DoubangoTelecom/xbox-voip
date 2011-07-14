@@ -808,11 +808,8 @@
 	# /*== Subscription-State: ==*/
 	action parse_header_Subscription_State
 	{
-		TSK_Debug.Warn("parse_header_Subscription_State NOT IMPLEMENTED. Will be added as Dummy header");
-        TSIP_HeaderDummy header = TSIP_HeaderDummy.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
-        message.AddHeader(header);
-		//tsip_header_Subscription_State_t* header =  tsip_header_Subscription_State_parse(state->tag_start, (state->tag_end-state->tag_start));
-		//ADD_HEADER(header);
+		TSIP_HeaderSubscriptionState header = TSIP_HeaderSubscriptionState.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
+		message.AddHeader(header);
 	}
 
 	# /*== Supported: ==*/

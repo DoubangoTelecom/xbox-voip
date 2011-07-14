@@ -25,7 +25,7 @@
 *	Ragel state machine.
 */
 
-/* #line 919 "./ragel/tsip_parser_header.rl" */
+/* #line 916 "./ragel/tsip_parser_header.rl" */
 
 
 
@@ -5411,7 +5411,7 @@ const int tsip_machine_parser_headers_error = 0;
 const int tsip_machine_parser_headers_en_main = 1;
 
 
-/* #line 933 "./ragel/tsip_parser_header.rl" */
+/* #line 930 "./ragel/tsip_parser_header.rl" */
 
 	public static Boolean Parse(TSK_RagelState state, ref TSIP_Message message)
 	{
@@ -5427,7 +5427,7 @@ const int tsip_machine_parser_headers_en_main = 1;
 	cs = tsip_machine_parser_headers_start;
 	}
 
-/* #line 943 "./ragel/tsip_parser_header.rl" */
+/* #line 940 "./ragel/tsip_parser_header.rl" */
 		
 /* #line 5433 "../Parsers/TSIP_ParserHeader.cs" */
 	{
@@ -5464,7 +5464,7 @@ _resume:
 	case 0: {
 		_widec = (int)(65536u + (data[p] - 0u));
 		if ( 
-/* #line 909 "./ragel/tsip_parser_header.rl" */
+/* #line 906 "./ragel/tsip_parser_header.rl" */
 
 		PrevNotComma(state, p)
 	 ) _widec += 65536;
@@ -6320,22 +6320,19 @@ _match:
 	case 82:
 /* #line 810 "./ragel/tsip_parser_header.rl" */
 	{
-		TSK_Debug.Warn("parse_header_Subscription_State NOT IMPLEMENTED. Will be added as Dummy header");
-        TSIP_HeaderDummy header = TSIP_HeaderDummy.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
-        message.AddHeader(header);
-		//tsip_header_Subscription_State_t* header =  tsip_header_Subscription_State_parse(state->tag_start, (state->tag_end-state->tag_start));
-		//ADD_HEADER(header);
+		TSIP_HeaderSubscriptionState header = TSIP_HeaderSubscriptionState.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
+		message.AddHeader(header);
 	}
 	break;
 	case 83:
-/* #line 820 "./ragel/tsip_parser_header.rl" */
+/* #line 817 "./ragel/tsip_parser_header.rl" */
 	{
 		TSIP_HeaderSupported header = TSIP_HeaderSupported.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
         message.AddHeader(header);
 	}
 	break;
 	case 84:
-/* #line 827 "./ragel/tsip_parser_header.rl" */
+/* #line 824 "./ragel/tsip_parser_header.rl" */
 	{
 		TSK_Debug.Warn("parse_header_Target_Dialog NOT IMPLEMENTED. Will be added as Dummy header");
         TSIP_HeaderDummy header = TSIP_HeaderDummy.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
@@ -6343,7 +6340,7 @@ _match:
 	}
 	break;
 	case 85:
-/* #line 835 "./ragel/tsip_parser_header.rl" */
+/* #line 832 "./ragel/tsip_parser_header.rl" */
 	{
 		TSK_Debug.Warn("parse_header_Timestamp NOT IMPLEMENTED. Will be added as Dummy header");
         TSIP_HeaderDummy header = TSIP_HeaderDummy.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
@@ -6351,7 +6348,7 @@ _match:
 	}
 	break;
 	case 86:
-/* #line 843 "./ragel/tsip_parser_header.rl" */
+/* #line 840 "./ragel/tsip_parser_header.rl" */
 	{
 		 if(message.To == null)
         {
@@ -6366,7 +6363,7 @@ _match:
 	}
 	break;
 	case 87:
-/* #line 858 "./ragel/tsip_parser_header.rl" */
+/* #line 855 "./ragel/tsip_parser_header.rl" */
 	{
 		TSK_Debug.Warn("parse_header_Unsupported NOT IMPLEMENTED. Will be added as Dummy header");
         TSIP_HeaderDummy header = TSIP_HeaderDummy.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
@@ -6374,7 +6371,7 @@ _match:
 	}
 	break;
 	case 88:
-/* #line 866 "./ragel/tsip_parser_header.rl" */
+/* #line 863 "./ragel/tsip_parser_header.rl" */
 	{
 		TSK_Debug.Warn("parse_header_User_Agent NOT IMPLEMENTED. Will be added as Dummy header");
         TSIP_HeaderDummy header = TSIP_HeaderDummy.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
@@ -6384,7 +6381,7 @@ _match:
 	}
 	break;
 	case 89:
-/* #line 876 "./ragel/tsip_parser_header.rl" */
+/* #line 873 "./ragel/tsip_parser_header.rl" */
 	{	
 		List<TSIP_HeaderVia> headers = TSIP_HeaderVia.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
         if(headers != null)
@@ -6394,7 +6391,7 @@ _match:
 	}
 	break;
 	case 90:
-/* #line 886 "./ragel/tsip_parser_header.rl" */
+/* #line 883 "./ragel/tsip_parser_header.rl" */
 	{
 		TSK_Debug.Warn("parse_header_Warning NOT IMPLEMENTED. Will be added as Dummy header");
         TSIP_HeaderDummy header = TSIP_HeaderDummy.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
@@ -6404,21 +6401,21 @@ _match:
 	}
 	break;
 	case 91:
-/* #line 896 "./ragel/tsip_parser_header.rl" */
+/* #line 893 "./ragel/tsip_parser_header.rl" */
 	{
 		TSIP_HeaderWWWAuthenticate header = TSIP_HeaderWWWAuthenticate.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
         message.AddHeader(header);
 	}
 	break;
 	case 92:
-/* #line 903 "./ragel/tsip_parser_header.rl" */
+/* #line 900 "./ragel/tsip_parser_header.rl" */
 	{
 		TSK_Debug.Warn("parse_header_extension_header NOT IMPLEMENTED. Will be added as Dummy header");
         TSIP_HeaderDummy header = TSIP_HeaderDummy.Parse(Encoding.UTF8.GetString(data, state.TagStart, (state.TagEnd - state.TagStart)));
         message.AddHeader(header);
 	}
 	break;
-/* #line 6422 "../Parsers/TSIP_ParserHeader.cs" */
+/* #line 6419 "../Parsers/TSIP_ParserHeader.cs" */
 		default: break;
 		}
 	}
@@ -6432,12 +6429,12 @@ _again:
 	_out: {}
 	}
 
-/* #line 944 "./ragel/tsip_parser_header.rl" */
+/* #line 941 "./ragel/tsip_parser_header.rl" */
 		
 		return ( cs >= 
-/* #line 6439 "../Parsers/TSIP_ParserHeader.cs" */
+/* #line 6436 "../Parsers/TSIP_ParserHeader.cs" */
 1398
-/* #line 945 "./ragel/tsip_parser_header.rl" */
+/* #line 942 "./ragel/tsip_parser_header.rl" */
  );
 	}
 

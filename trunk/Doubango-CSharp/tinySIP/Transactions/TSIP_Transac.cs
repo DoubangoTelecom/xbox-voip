@@ -57,8 +57,10 @@ namespace Doubango.tinySIP.Transactions
         private readonly TSIP_Dialog mDialog;
         private OnEvent mCallback;
         private String mBranch;
+        private Boolean mRunning;
 
         private static Int64 sUniqueId = 0;
+        internal const String MAGIC_COOKIE = "z9hG4bK";
 
         internal delegate Boolean OnEvent(tsip_transac_event_type_t type, TSIP_Message message);
 
@@ -92,9 +94,10 @@ namespace Doubango.tinySIP.Transactions
             get { return mType; }
         }
 
-        internal OnEvent Callback
+        protected OnEvent Callback
         {
             get { return mCallback; }
+            set { mCallback = value; }
         }
 
         internal Boolean Reliable
@@ -120,14 +123,55 @@ namespace Doubango.tinySIP.Transactions
         internal String Branch
         {
             get { return mBranch; }
+            set { mBranch = value; }
+        }
+
+        protected Boolean Running
+        {
+            get { return mRunning; }
+            set { mRunning = value; }
+        }
+
+        internal TSIP_Dialog Dialog
+        {
+            get { return mDialog; }
+        }
+
+        protected TSIP_Stack Stack
+        {
+            get { return mDialog.SipSession.Stack; }
         }
 
         protected abstract TSK_StateMachine StateMachine { get; }
         internal abstract Boolean Start(TSIP_Request request);
 
+        internal Boolean RaiseCallback(tsip_transac_event_type_t type, TSIP_Message message)
+        {
+            if (this.Callback != null)
+            {
+                return this.Callback(type, message);
+            }
+            return false;
+        }
+
+        internal Boolean RaiseCallback(tsip_transac_event_type_t type)
+        {
+            return this.RaiseCallback(type, null);
+        }
+
         internal Boolean Send(String branch, TSIP_Message message)
         {
             return mDialog.Stack.LayerTransport.SendMessage(branch, message);
+        }
+
+        internal Boolean ExecuteAction(Int32 fsmActionId, TSIP_Message message)
+        {
+            return this.StateMachine.ExecuteAction(fsmActionId, this, message, this, message);
+        }
+
+        protected Boolean RemoveFromLayer()
+        {
+            return this.Stack.LayerTransac.RemoveTransacById(this.Id);
         }
 
         internal static int Compare(TSIP_Transac t1, TSIP_Transac t2)

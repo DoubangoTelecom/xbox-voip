@@ -66,6 +66,7 @@
     <Compile Include="tinySAK\TSK_StateMachine.cs" />
     <Compile Include="tinySAK\TSK_String.cs" />
     <Compile Include="tinySAK\TSK_Time.cs" />
+    <Compile Include="tinySAK\TSK_Timer.cs" />
     <Compile Include="tinySIP\Authentication\TSIP_Challenge.cs" />
     <Compile Include="tinySIP\Dialogs\TSIP_Dialog.cs" />
     <Compile Include="tinySIP\Dialogs\TSIP_DialogInvite.cdiv.cs" />
@@ -110,6 +111,7 @@
     <Compile Include="tinySIP\Headers\TSIP_HeaderRecordRoute.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderRequire.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderRoute.cs" />
+    <Compile Include="tinySIP\Headers\TSIP_HeaderSubscriptionState.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderSupported.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderTo.cs" />
     <Compile Include="tinySIP\Headers\TSIP_HeaderVia.cs" />
@@ -134,6 +136,7 @@
     <Compile Include="tinySIP\TSIP_Action.cs" />
     <Compile Include="tinySIP\TSIP_Message.cs" />
     <Compile Include="tinySIP\TSIP_Stack.cs" />
+    <Compile Include="tinySIP\TSIP_Timers.cs" />
     <Compile Include="tinySIP\TSIP_Uri.cs" />
   </ItemGroup>
   <ItemGroup>

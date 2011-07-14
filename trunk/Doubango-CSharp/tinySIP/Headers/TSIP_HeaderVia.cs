@@ -39,7 +39,7 @@ namespace Doubango.tinySIP.Headers
 	{
 		private String mBranch;
 		private String mHost;
-		private Int16 mPort;
+		private UInt16 mPort;
 		private String mComp;
 		private String mSigcompId;
 		private String mReceived;
@@ -51,12 +51,15 @@ namespace Doubango.tinySIP.Headers
 		private Int32 mRPort;
 		private Int32 mTTL;
 
+		internal const String PROTO_NAME_DEFAULT = "SIP";
+        internal const String PROTO_VERSION_DEFAULT = "2.0";
+
         public TSIP_HeaderVia()
-            :this(null,null,null,null,-1)
+            :this(null,null,null,null,0)
         {
         }
 
-		public TSIP_HeaderVia(String protoName, String protoVersion, String transport, String host, Int16 port)
+		public TSIP_HeaderVia(String protoName, String protoVersion, String transport, String host, UInt16 port)
 			: base(tsip_header_type_t.Via)
 		{
 			this.ProtoName = protoName;
@@ -126,7 +129,7 @@ namespace Doubango.tinySIP.Headers
 			set{ mHost = value; }
 		}
 
-		public Int16 Port
+		public UInt16 Port
 		{
 			get{ return mPort; }
 			set{ mPort = value; }
@@ -187,7 +190,7 @@ namespace Doubango.tinySIP.Headers
 		}
 
 		
-/* #line 191 "../Headers/TSIP_HeaderVia.cs" */
+/* #line 194 "../Headers/TSIP_HeaderVia.cs" */
 static readonly sbyte[] _tsip_machine_parser_header_Via_actions =  new sbyte [] {
 	0, 1, 0, 1, 2, 1, 3, 1, 
 	4, 1, 5, 1, 6, 1, 7, 1, 
@@ -1147,7 +1150,7 @@ const int tsip_machine_parser_header_Via_error = 0;
 const int tsip_machine_parser_header_Via_en_main = 1;
 
 
-/* #line 291 "./ragel/tsip_parser_header_Via.rl" */
+/* #line 294 "./ragel/tsip_parser_header_Via.rl" */
 
 		public static List<TSIP_HeaderVia> Parse(String data)
 		{
@@ -1162,14 +1165,14 @@ const int tsip_machine_parser_header_Via_en_main = 1;
 
 			
 			
-/* #line 1166 "../Headers/TSIP_HeaderVia.cs" */
+/* #line 1169 "../Headers/TSIP_HeaderVia.cs" */
 	{
 	cs = tsip_machine_parser_header_Via_start;
 	}
 
-/* #line 305 "./ragel/tsip_parser_header_Via.rl" */
+/* #line 308 "./ragel/tsip_parser_header_Via.rl" */
 			
-/* #line 1173 "../Headers/TSIP_HeaderVia.cs" */
+/* #line 1176 "../Headers/TSIP_HeaderVia.cs" */
 	{
 	sbyte _klen;
 	short _trans;
@@ -1281,7 +1284,7 @@ _match:
 	case 5:
 /* #line 57 "./ragel/tsip_parser_header_Via.rl" */
 	{
-		curr_via.Port = TSK_RagelState.Parser.GetInt16(data, p, tag_start);
+		curr_via.Port = (UInt16)TSK_RagelState.Parser.GetUInt32(data, p, tag_start);
 	}
 	break;
 	case 6:
@@ -1357,7 +1360,7 @@ _match:
 		
 	}
 	break;
-/* #line 1361 "../Headers/TSIP_HeaderVia.cs" */
+/* #line 1364 "../Headers/TSIP_HeaderVia.cs" */
 		default: break;
 		}
 	}
@@ -1371,12 +1374,12 @@ _again:
 	_out: {}
 	}
 
-/* #line 306 "./ragel/tsip_parser_header_Via.rl" */
+/* #line 309 "./ragel/tsip_parser_header_Via.rl" */
 			
 			if( cs < 
-/* #line 1378 "../Headers/TSIP_HeaderVia.cs" */
+/* #line 1381 "../Headers/TSIP_HeaderVia.cs" */
 338
-/* #line 307 "./ragel/tsip_parser_header_Via.rl" */
+/* #line 310 "./ragel/tsip_parser_header_Via.rl" */
  ){
 				TSK_Debug.Error("Failed to parse SIP 'Via' header.");
 				hdr_vias.Clear();

@@ -61,7 +61,7 @@ namespace Doubango.tinySIP
         private Boolean mValid;
         private Boolean mRunning;
 
-        public TSIP_Event.onEvent OnStackEvent;
+        public TSIP_Event.onEvent Callback;
 
         public TSIP_Stack(TSIP_Uri domainName, String privateIdentity, TSIP_Uri publicIdentity, String proxyHost, ushort proxyPort)
         {
@@ -133,6 +133,11 @@ namespace Doubango.tinySIP
             get { return mPrivateIdentity; }
         }
 
+        internal TSIP_Uri PublicIdentity
+        {
+            get { return mPublicIdentity; }
+        }
+
         internal TSIP_Uri PreferredIdentity
         {
             get { return mPreferredIdentity; }
@@ -158,6 +163,16 @@ namespace Doubango.tinySIP
             get { return mProxyType; }
         }
 
+        internal String ProxyHost
+        {
+            get { return mProxyHost; }
+        }
+
+        internal ushort ProxyPort
+        {
+            get { return mProxyPort; }
+        }
+
         internal TSIP_DialogLayer LayerDialog
         {
             get { return mLayerDialog; }
@@ -171,6 +186,18 @@ namespace Doubango.tinySIP
         internal TSIP_TransportLayer LayerTransport
         {
             get { return mLayerTransport; }
+        }
+
+        public String AoRIP
+        {
+            get { return mAoRIP; }
+            set { mAoRIP = value; }
+        }
+
+        public ushort AoRPort
+        {
+            get { return mAoRPort; }
+            set { mAoRPort = value; }
         }
 
         internal void AddSession(TSip_Session session)
@@ -274,16 +301,25 @@ bail:
             return ok;
         }
 
+#if !WINDOWS_PHONE
         private void AsyncCallbackForDelegate(IAsyncResult result)
         {
 
         }
+#endif
 
         internal void HandleEventAsynchronously(TSIP_Event @event)
         {
-            if (OnStackEvent != null)
+            if (Callback != null)
             {
-                OnStackEvent.BeginInvoke(@event, AsyncCallbackForDelegate, null);
+#if WINDOWS_PHONE // FIXME: .NET Compact Framework does not support invoking delegates asynchronously.
+                new System.Threading.Thread(delegate()
+                {
+                    Callback(@event);
+                }).Start();
+#else
+                Callback.BeginInvoke(@event, AsyncCallbackForDelegate, null);
+#endif
             }
         }
 
@@ -297,7 +333,7 @@ bail:
                 {
                     Boolean ipv6 = TNET_Socket.IsIPv6Type(transport.Type);
                     Boolean quote_ip = (ipv6 && !String.IsNullOrEmpty(mProxyHost) && mProxyHost.Contains(":"))/* IPv6 IP string?*/;
-                    String uriString = String.Format("{0}:{1}{2}{2}:{3};{4};transport={5}",
+                    String uriString = String.Format("{0}:{1}{2}{3}:{4};{5};transport={6}",
                             transport.Scheme,
                             quote_ip ? "[" : "",
                             mProxyHost,
@@ -307,6 +343,23 @@ bail:
                             transport.Protocol
                         );
                     uri = TSIP_ParserUri.Parse(uriString);
+                }
+            }
+            return uri;
+        }
+
+        internal TSIP_Uri GetContactUri(String protocol)
+        {
+            TSIP_Uri uri = null;
+            foreach (TSIP_Transport transport in mLayerTransport.Transports)
+            {
+                if (String.Equals(transport.Protocol, protocol, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    if ((uri = transport.GetUri(false)) != null)
+                    {
+                        uri.UserName = mPublicIdentity.UserName;
+                        break;
+                    }
                 }
             }
             return uri;

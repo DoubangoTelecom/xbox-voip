@@ -25,6 +25,7 @@ using System.Text;
 using System.Net.Sockets;
 using System.Net;
 using Doubango.tinySAK;
+using System.Threading;
 namespace Doubango.tinyNET
 {
     public class TNET_Socket : IDisposable
@@ -82,11 +83,22 @@ namespace Doubango.tinyNET
         public static Int64 sUniqueId = 0;
 
         private readonly Int64 mId;
+        private readonly ManualResetEvent mSocketEvent;
         private readonly Socket mSocket;
-        private readonly SocketAsyncEventArgs mSocketEventArgs;
+        private readonly SocketAsyncEventArgs mSendSocketEventArgs;
+        private SocketAsyncEventArgs mRecvSocketEventArgs;
+        public event EventHandler<SocketAsyncEventArgs> RecvSocketCompleted;
         private readonly String mHost;
         private readonly ushort mPort;
         private readonly tnet_socket_type_t mType;
+
+        private const Int32 MAX_RCV_BUFFER_SIZE = 0xFFFF;
+
+        // Define a timeout in milliseconds for each asynchronous call. If a response is not received within this 
+        // timeout period, the call is aborted.
+        private const int TIMEOUT_MILLISECONDS = 5000;
+
+        byte[] buffers = new byte[MAX_RCV_BUFFER_SIZE];
 
         public TNET_Socket(String host, ushort port, tnet_socket_type_t type, Boolean nonblocking, Boolean bindsocket)
         {
@@ -94,17 +106,44 @@ namespace Doubango.tinyNET
             mType = type;
             mHost = host;
             mPort = port;
+            mSocketEvent = new ManualResetEvent(false);
 
-            mSocketEventArgs = new SocketAsyncEventArgs();
-            mSocketEventArgs.Completed += delegate(object sender, SocketAsyncEventArgs e)
+            mSendSocketEventArgs = new SocketAsyncEventArgs();
+            mSendSocketEventArgs.Completed += delegate(object sender, SocketAsyncEventArgs e)
             {
-                // To be implemented
+
+                if (e.SocketError != SocketError.Success)
+                {
+                    mSocketEvent.Set();
+                    return;
+                }
+
+                // On WP7 Socket.ReceiveFromAsync() will only works after at least ONE SendTo()
+                if (e.LastOperation == SocketAsyncOperation.SendTo)
+                {
+                    if (mRecvSocketEventArgs == null && RecvSocketCompleted != null)
+                    {
+                        mRecvSocketEventArgs = new SocketAsyncEventArgs();
+                        
+                        // setting the remote endpoint will not filter on the remote host:port
+                        // => will continue to work even if the remote port is different than 5060
+                        // IPEndPoint is not serializable => create new one
+                        mRecvSocketEventArgs.RemoteEndPoint = new IPEndPoint(IPAddress.Any, 5060); // e.RemoteEndPoint
+                        mRecvSocketEventArgs.Completed += this.RecvSocketCompleted;
+                        
+                        mRecvSocketEventArgs.SetBuffer(buffers, 0, buffers.Length);
+                        mRecvSocketEventArgs.UserToken = e.UserToken;
+                        (mRecvSocketEventArgs.UserToken as TNET_Socket).Socket.ReceiveFromAsync(mRecvSocketEventArgs);
+                    }
+                }
+
+                mSocketEvent.Set();
             };
 
             AddressFamily addressFamily = TNET_Socket.IsIPv6Type(type) ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork;
             SocketType socketType = TNET_Socket.IsStreamType(type) ? SocketType.Stream : SocketType.Dgram;
 #if WINDOWS_PHONE
-            ProtocolType protocolType = ProtocolType.Unspecified; 
+            ProtocolType protocolType = TNET_Socket.IsStreamType(type) ? ProtocolType.Tcp : ProtocolType.Udp; 
 #else
             ProtocolType protocolType = TNET_Socket.IsIPv6Type(type) ? ProtocolType.IP : ProtocolType.IP; // Leave it like this
 #endif
@@ -113,7 +152,9 @@ namespace Doubango.tinyNET
             mSocket.Blocking = !nonblocking;
             mSocket.UseOnlyOverlappedIO = true;
 #endif
-            
+
+            mSendSocketEventArgs.UserToken = this;
+
             if (bindsocket)
             {
                 IPAddress ipAddress = TNET_Utils.GetBestLocalIPAddress(host, type);
@@ -160,6 +201,11 @@ namespace Doubango.tinyNET
                 mSocket.Disconnect(true);
 #endif
             }
+        }
+
+        internal Socket Socket
+        {
+            get { return mSocket; }
         }
 
         public tnet_socket_type_t Type
@@ -245,24 +291,67 @@ namespace Doubango.tinyNET
             get { return this.IsIPSec || this.IsTLS; }
         }
 
-        public Int32 SendTo(IPEndPoint remoteEP, byte[] buffer)
+        internal Boolean ScheduleReceiveFromAsync()
+        {
+            /*if (mRecvSocketEventArgs != null && mSocket != null)
+            {
+                mRecvSocketEventArgs = new SocketAsyncEventArgs();
+                // setting the remote endpoint will not filter on the remote host:port
+                // => will continue to work even if the remote port is different than 5060
+                // IPEndPoint is not serializable => create new one
+                mRecvSocketEventArgs.RemoteEndPoint = new IPEndPoint(IPAddress.Any, 5060); // e.RemoteEndPoint
+                mRecvSocketEventArgs.Completed += this.RecvSocketCompleted;
+                byte[] buffers = new byte[MAX_RCV_BUFFER_SIZE];
+                mRecvSocketEventArgs.SetBuffer(buffers, 0, buffers.Length);
+                mRecvSocketEventArgs.UserToken = this;
+                return mSocket.ReceiveAsync(mRecvSocketEventArgs);
+            }*/
+            return false;
+        }
+
+        public Int32 SendTo(EndPoint remoteEP, byte[] buffer)
         {
             try
             {
-#if WINDOWS_PHONE
-                mSocketEventArgs.SetBuffer(buffer, 0, buffer.Length);
-                mSocketEventArgs.RemoteEndPoint = remoteEP;
-                return mSocket.SendToAsync(mSocketEventArgs) ? buffer.Length : -1;
-#else
+//#if WINDOWS_PHONE
+                Int32 ret;
+                mSocketEvent.Reset();
+                mSendSocketEventArgs.SetBuffer(buffer, 0, buffer.Length);
+                mSendSocketEventArgs.RemoteEndPoint = remoteEP;
+                ret = mSocket.SendToAsync(mSendSocketEventArgs) ? buffer.Length : -1;
+                mSocketEvent.WaitOne(TIMEOUT_MILLISECONDS);
+
+                return ret;
+//#else
                 
-                return mSocket.SendTo(buffer, remoteEP);
-#endif
+//               return mSocket.SendTo(buffer, remoteEP);
+//#endif
             }
             catch (Exception e)
             {
                 TSK_Debug.Error("SendTo() failed: {0}", e);
             }
             return -1;
+        }
+
+        /// <summary>
+        /// Gets local ip and address (FIXME: add support for STUN).
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <param name="port"></param>
+        /// <returns></returns>
+        public Boolean GetLocalIpAndPort(out String ip, out ushort port)
+        {
+            ip = this.IsIPv6 ? "::" : "0.0.0.1";
+            port = 5060;
+
+            if (mSocket != null)
+            {
+                ip = this.Host;
+                port = this.Port;
+                return true;
+            }
+            return false;
         }
 
         private static Boolean IsIPv4Type(tnet_socket_type_t type)
@@ -290,12 +379,15 @@ namespace Doubango.tinyNET
             return (((int)type & TNET_SOCKET_TYPE_TLS) == TNET_SOCKET_TYPE_TLS);
         }
 
-        public static IPEndPoint CreateEndPoint(String host, ushort port)
+        public static EndPoint CreateEndPoint(String host, ushort port)
         {
             try
             {
-                var ipAddress = IPAddress.Parse(host);
-                return new IPEndPoint(ipAddress, port);
+#if WINDOWS_PHONE
+                return new DnsEndPoint(host, port);
+#else
+                return new IPEndPoint(Dns.GetHostAddresses(host)[0], port);
+#endif
             }
             catch (Exception e)
             {

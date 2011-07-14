@@ -103,6 +103,9 @@
     <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_Time.cs">
       <Link>tinySAK\TSK_Time.cs</Link>
     </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySAK\TSK_Timer.cs">
+      <Link>tinySAK\TSK_Timer.cs</Link>
+    </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySIP\Authentication\TSIP_Challenge.cs">
       <Link>tinySIP\Authentication\TSIP_Challenge.cs</Link>
     </Compile>
@@ -235,6 +238,9 @@
     <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderRoute.cs">
       <Link>tinySIP\Headers\TSIP_HeaderRoute.cs</Link>
     </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderSubscriptionState.cs">
+      <Link>tinySIP\Headers\TSIP_HeaderSubscriptionState.cs</Link>
+    </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySIP\Headers\TSIP_HeaderSupported.cs">
       <Link>tinySIP\Headers\TSIP_HeaderSupported.cs</Link>
     </Compile>
@@ -306,6 +312,9 @@
     </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySIP\TSIP_Stack.cs">
       <Link>tinySIP\TSIP_Stack.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Doubango-CSharp\tinySIP\TSIP_Timers.cs">
+      <Link>tinySIP\TSIP_Timers.cs</Link>
     </Compile>
     <Compile Include="..\..\Doubango-CSharp\tinySIP\TSIP_Uri.cs">
       <Link>tinySIP\TSIP_Uri.cs</Link>

@@ -26,6 +26,7 @@ using Doubango.tinySAK;
 using Doubango.tinySIP.Headers;
 using Doubango.tinySIP.Authentication;
 using Doubango.tinySIP.Transactions;
+using Doubango.tinySIP.Events;
 
 namespace Doubango.tinySIP.Dialogs
 {
@@ -74,9 +75,11 @@ namespace Doubango.tinySIP.Dialogs
 
         private tsip_dialog_state_t mState;
 
-        private Boolean mRunning;
+        protected Boolean mRunning;
 
-        private String mLastError;
+        private String mLastErrorPhrase;
+        private short mLastErrorCode;
+        private TSIP_Message mLastErrorMessage;
 
         private String mTagLocal;
         private TSIP_Uri mUriLocal;
@@ -101,6 +104,8 @@ namespace Doubango.tinySIP.Dialogs
         private OnEvent mCallback;
 
         private static Int64 sUniqueId = 0;
+
+        internal const Int64 SHUTDOWN_TIMEOUT = 2000; /* miliseconds. */
 
         internal TSIP_Dialog(tsip_dialog_type_t type, String callId, TSip_Session session)
         {
@@ -127,7 +132,7 @@ namespace Doubango.tinySIP.Dialogs
             if (mSipSession != null)
             {
                 mExpires = mSipSession.Expires;
-                mUriLocal = !String.IsNullOrEmpty(mCallId) /* Server Side */ ? mSipSession.UriTo : mSipSession.UriFrom;
+                mUriLocal = !String.IsNullOrEmpty(callId) /* Server Side */ ? mSipSession.UriTo : mSipSession.UriFrom;
                 if (mSipSession.UriTo != null)
                 {
                     mUriRemote = mSipSession.UriTo;
@@ -169,16 +174,25 @@ namespace Doubango.tinySIP.Dialogs
             get { return SipSession.Stack; }
         }
 
-        internal TSIP_Action CurrentAction
+        protected TSIP_Action CurrentAction
         {
             get { return mCurrentAction; }
             set { mCurrentAction = value; }
         }
 
-        internal String LastError
+        protected String LastErrorPhrase
         {
-            get { return mLastError; }
-            set { mLastError = value; }
+            get { return mLastErrorPhrase; }
+        }
+
+        protected short LastErrorCode
+        {
+            get { return mLastErrorCode; }
+        }
+
+        protected TSIP_Message LastErrorMessage
+        {
+            get { return mLastErrorMessage; }
         }
 
         internal String CallId
@@ -196,7 +210,71 @@ namespace Doubango.tinySIP.Dialogs
             get { return mTagRemote; }
         }
 
+        internal Boolean Running
+        {
+            get { return mRunning; }
+        }
+
+        protected tsip_dialog_state_t State
+        {
+            get { return mState; }
+            set { mState = value; }
+        }
+
+        protected OnEvent Callback
+        {
+            get { return mCallback; }
+            set { mCallback = value; }
+        }
+
+        protected Int64 Expires
+        {
+            get { return mExpires; }
+            set { mExpires = value; }
+        }
+
         internal abstract TSK_StateMachine StateMachine { get; }
+        
+        protected void Signal(TSIP_EventDialog.tsip_dialog_event_type_t eventType, String phrase, TSIP_Message sipMessage)
+        {
+            TSIP_EventDialog.Signal(eventType, mSipSession, phrase, sipMessage);
+        }
+
+        protected void SetLastError(short code, String phrase, TSIP_Message message)
+        {
+            mLastErrorCode = code;
+            mLastErrorPhrase = phrase;
+            mLastErrorMessage = message;
+        }
+
+        protected Boolean RemoveFromLayer()
+        {
+            return this.Stack.LayerDialog.RemoveDialogById(this.Id);
+        }
+
+        protected void SetLastError(short code, String phrase)
+        {
+            this.SetLastError(code, phrase, null);
+        }
+
+        internal Boolean RaiseCallback(tsip_dialog_event_type_t type, TSIP_Message message)
+        {
+            if (mCallback != null)
+            {
+               return mCallback(type, message);
+            }
+            return false;
+        }
+
+        internal Boolean RaiseCallback(tsip_dialog_event_type_t type)
+        {
+            return this.RaiseCallback(type, null);
+        }
+
+        protected void Signal(TSIP_EventDialog.tsip_dialog_event_type_t eventType, String phrase)
+        {
+            TSIP_EventDialog.Signal(eventType, mSipSession, phrase, null);
+        }
 
         protected TSIP_Request CreateRequest(String method)
         {
@@ -552,6 +630,301 @@ namespace Doubango.tinySIP.Dialogs
                     }
             }
             return false;
+        }
+
+        /// <summary>
+        /// Updates the dialog state:
+        /// - Authorizations (using challenges from the @a response message)
+        /// - State (early, established, disconnected, ...)
+        /// - Routes (and Service-Route)
+        /// - Target (remote)
+        /// - ...
+        /// </summary>
+        /// <param name="response"></param>
+        /// <returns></returns>
+        protected Boolean UpdateWithResponse(TSIP_Response response)
+        {
+            if (response == null || response.To == null || response.CSeq == null)
+            {
+                return false;
+            }
+            String tag = response.To.Tag;
+
+            /* 
+		    *	1xx (!100) or 2xx 
+		    */
+            /*
+            *	401 or 407 or 421 or 494
+            */
+            if (response.StatusCode == 401 || response.StatusCode == 407 || response.StatusCode == 421 || response.StatusCode == 494)
+            {
+                Boolean acceptNewVector;
+
+                /* 3GPP IMS - Each authentication vector is used only once.
+                *	==> Re-registration/De-registration ==> Allow 401/407 challenge.
+                */
+                acceptNewVector = (response.CSeq.RequestType == TSIP_Message.tsip_request_type_t.REGISTER && this.State == tsip_dialog_state_t.Established);
+                return this.UpdateChallenges(response, acceptNewVector);
+            }
+            else if (100 < response.StatusCode && response.StatusCode < 300)
+            {
+                tsip_dialog_state_t state = this.State;
+
+                /* 1xx */
+                if (response.StatusCode <= 199)
+                {
+                    if (String.IsNullOrEmpty(response.To.Tag))
+                    {
+                        TSK_Debug.Error("Invalid tag  parameter");
+                        return false;
+                    }
+                    state = tsip_dialog_state_t.Early;
+                }
+                /* 2xx */
+                else
+                {
+                    state = tsip_dialog_state_t.Established;
+                }
+
+                /* Remote target */
+                {
+                    /*	RFC 3261 12.2.1.2 Processing the Responses
+                        When a UAC receives a 2xx response to a target refresh request, it
+                        MUST replace the dialog's remote target URI with the URI from the
+                        Contact header field in that response, if present.
+
+                        FIXME: Because PRACK/UPDATE sent before the session is established MUST have
+                        the rigth target URI to be delivered to the UAS ==> Do not not check that we are connected
+                    */
+                    if (response.CSeq.RequestType != TSIP_Message.tsip_request_type_t.REGISTER && response.Contact != null && response.Contact.Uri != null)
+                    {
+                        mUriRemoteTarget = response.Contact.Uri.Clone(true, false);
+                    }
+                }
+
+                /* Route sets */
+			    {
+				    int index;
+				    TSIP_HeaderRecordRoute recordRoute;
+
+                    mRecordRoutes.Clear();
+
+                    for (index = 0; (recordRoute = response.GetHeaderAtIndex(TSIP_Header.tsip_header_type_t.Record_Route, index) as TSIP_HeaderRecordRoute) != null; index++)
+                    {
+                        mRecordRoutes.Insert(0, recordRoute); /* Copy reversed. */
+				    }
+			    }
+
+                /* cseq + tags + ... */
+                if (this.State == tsip_dialog_state_t.Established && String.Equals(mTagRemote, tag, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return true;
+                }
+                else
+                {
+                    if (response.CSeq.RequestType != TSIP_Message.tsip_request_type_t.REGISTER && response.CSeq.RequestType != TSIP_Message.tsip_request_type_t.PUBLISH)
+                    { /* REGISTER and PUBLISH don't establish dialog */
+                        mTagRemote = tag;
+                    }
+#if NEVER_EXECUTE_00	// PRACK and BYE will have same CSeq value ==> Let CSeq value to be incremented by "tsip_dialog_request_new()"
+				self->cseq_value = response->CSeq ? response->CSeq->seq : self->cseq_value;
+#endif
+                }
+
+                this.State = state;
+                return true;
+            }
+
+            return true;
+        }
+
+        protected Boolean UpdateWithINVITE(TSIP_Request invite)
+        {
+            if (invite == null)
+            {
+                return false;
+            }
+
+            /* Remote target */
+            if (invite.Contact != null && invite.Contact.Uri != null)
+            {
+                mUriRemoteTarget = invite.Contact.Uri.Clone(true, false);
+            }
+
+            /* cseq + tags + remote-uri */
+            mTagRemote = invite.From != null ? invite.From.Tag : "doubango";
+
+            /* self->cseq_value = invite->CSeq ? invite->CSeq->seq : self->cseq_value; */
+            if (invite.From != null && invite.From.Uri != null)
+            {
+                mUriRemote = invite.From.Uri;
+            }
+
+            /* Route sets */
+	        {
+		        int index;
+		        TSIP_HeaderRecordRoute recordRoute;
+
+                mRecordRoutes.Clear();
+
+		        for(index = 0; (recordRoute = (invite.GetHeaderAtIndex(TSIP_Header.tsip_header_type_t.Record_Route, index)) as TSIP_HeaderRecordRoute) != null; index++)
+                {
+			        mRecordRoutes.Insert(0, recordRoute);/* Copy non-reversed. */
+		        }
+	        }
+
+            this.State = tsip_dialog_state_t.Established;
+
+            return true;
+        }
+
+        private Boolean UpdateChallenges(TSIP_Response response, Boolean acceptNewVector)
+        {
+            Boolean ret = true;
+            TSIP_HeaderWWWAuthenticate WWW_Authenticate;
+            // TSIP_HeaderProxyAuthenticate Proxy_Authenticate;
+
+            /* RFC 2617 - HTTP Digest Session
+
+	        *	(A) The client response to a WWW-Authenticate challenge for a protection
+		        space starts an authentication session with that protection space.
+		        The authentication session lasts until the client receives another
+		        WWW-Authenticate challenge from any server in the protection space.
+
+		        (B) The server may return a 401 response with a new nonce value, causing the client
+		        to retry the request; by specifying stale=TRUE with this response,
+		        the server tells the client to retry with the new nonce, but without
+		        prompting for a new username and password.
+	        */
+            /* RFC 2617 - 1.2 Access Authentication Framework
+                The realm directive (case-insensitive) is required for all authentication schemes that issue a challenge.
+            */
+
+            /* FIXME: As we perform the same task ==> Use only one loop.
+            */
+
+            for(int i =0; (WWW_Authenticate = (TSIP_HeaderWWWAuthenticate)response.GetHeaderAtIndex(TSIP_Header.tsip_header_type_t.WWW_Authenticate, i)) != null; i++)
+            {
+		        Boolean isnew = true;
+
+		        foreach(TSIP_Challenge challenge in mChallenges)
+                {
+			        //if(challenge.IProxy)
+                    //{
+                    //    continue;
+                    //}
+        			
+			        if(String.Equals(challenge.Realm, WWW_Authenticate.Realm, StringComparison.InvariantCultureIgnoreCase) && (WWW_Authenticate.Stale || acceptNewVector))
+                    {
+				        /*== (B) ==*/
+				        if(!(ret = challenge.Update(WWW_Authenticate.Scheme, 
+					        WWW_Authenticate.Realm,
+					        WWW_Authenticate.Nonce, 
+					        WWW_Authenticate.Opaque, 
+					        WWW_Authenticate.Algorithm, 
+					        WWW_Authenticate.Qop)))
+				        {
+					        return ret;
+				        }
+				        else
+                        {
+					        isnew = false;
+					        continue;
+				        }
+			        }
+			        else
+                    {
+				        TSK_Debug.Error("Failed to handle new challenge");
+				        return false;
+			        }
+		        }
+
+		        if(isnew)
+                {
+                    TSIP_Challenge challenge;
+			        if((challenge = new TSIP_Challenge(this.Stack,
+					        false, 
+					        WWW_Authenticate.Scheme, 
+					        WWW_Authenticate.Realm, 
+					        WWW_Authenticate.Nonce, 
+					        WWW_Authenticate.Opaque, 
+					        WWW_Authenticate.Algorithm, 
+					        WWW_Authenticate.Qop)) != null)
+			        {
+                        mChallenges.Add(challenge);
+			        }
+			        else
+                    {
+				        TSK_Debug.Error("Failed to handle new challenge");
+				        return false;
+			        }
+		        }
+	        }
+
+            return ret;
+        }
+
+        protected Int64 GetNewDelay(TSIP_Response response)
+        {
+            Int64 expires = mExpires;
+            Int64 newdelay = expires;	/* default value */
+            TSIP_Header hdr;
+            int i;
+
+            /*== NOTIFY with subscription-state header with expires parameter */
+            if (response.CSeq.RequestType == TSIP_Message.tsip_request_type_t.NOTIFY)
+            {
+                TSIP_HeaderSubscriptionState hdr_state = response.GetHeader(TSIP_Header.tsip_header_type_t.Subscription_State) as TSIP_HeaderSubscriptionState;
+                if (hdr_state != null && hdr_state.Expires > 0)
+                {
+                    expires = TSK_Time.Seconds2Milliseconds(hdr_state.Expires);
+                    goto compute;
+                }
+            }
+
+            /*== Expires header */
+            if((hdr = response.GetHeader(TSIP_Header.tsip_header_type_t.Expires)) != null)
+            {
+                expires = TSK_Time.Seconds2Milliseconds((hdr as TSIP_HeaderExpires).DeltaSeconds);
+                goto compute;
+            }
+
+            /*== Contact header */
+            for(i=0; (hdr = response.GetHeaderAtIndex(TSIP_Header.tsip_header_type_t.Contact, i)) != null; i++)
+            {
+                TSIP_HeaderContact contact = hdr as TSIP_HeaderContact;
+
+                if(contact != null && contact.Uri != null)
+                {
+                    String transport = TSK_Param.GetValueByName(contact.Uri.Params, "transport");
+                    TSIP_Uri contactUri = this.Stack.GetContactUri(String.IsNullOrEmpty(transport) ? "udp" : transport);
+                    if(contactUri != null)
+                    {
+                    if(String.Equals(contact.Uri.UserName, contactUri.UserName)
+					        && String.Equals(contact.Uri.Host, contactUri.Host)
+					        && contact.Uri.Port == contactUri.Port)
+				        {
+                            if(contact.Expires >= 0){ /* No expires parameter ==> -1*/
+						        expires = TSK_Time.Seconds2Milliseconds(contact.Expires);
+						        goto compute;
+					        }
+                        }
+                    }
+                }
+            }
+
+        /*
+	    *	3GPP TS 24.229 - 
+	    *
+	    *	The UE shall reregister the public user identity either 600 seconds before the expiration time if the initial 
+	    *	registration was for greater than 1200 seconds, or when half of the time has expired if the initial registration 
+	    *	was for 1200 seconds or less.
+	    */
+        compute:
+            expires = TSK_Time.Milliseconds2Seconds(expires);
+            newdelay = (expires > 1200) ? (expires - 600) : (expires / 2);
+
+            return TSK_Time.Seconds2Milliseconds(newdelay);
         }
 
         public Boolean ExecuteAction(Int32 fsmActionId, TSIP_Message message, TSIP_Action action)
